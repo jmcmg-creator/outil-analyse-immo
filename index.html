@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Simulateur – Hôtel Alexandre III Cannes</title>
+<title>Simulateur d'investissement hôtelier – Méthodologie expertale</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
@@ -14,13 +14,16 @@
   body{background:linear-gradient(135deg,#F8F9FC 0%,#EEF1F6 100%);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
   .card{background:white;border:1px solid #E5E7EB;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
   .card-header{background:var(--navy);color:white;padding:14px 20px;border-radius:14px 14px 0 0;font-weight:700;letter-spacing:.02em;}
+  .card-header-gold{background:var(--gold);}
+  .card-header-green{background:var(--green);}
   input[type="range"]{-webkit-appearance:none;width:100%;height:6px;background:#E5E7EB;border-radius:3px;outline:none;}
-  input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:var(--navy);border-radius:50%;cursor:pointer;border:3px solid white;box-shadow:0 0 0 1px var(--navy);}
-  input[type="range"]::-moz-range-thumb{width:20px;height:20px;background:var(--navy);border-radius:50%;cursor:pointer;border:3px solid white;box-shadow:0 0 0 1px var(--navy);}
-  .kpi{padding:14px 18px;border-radius:10px;background:var(--light);border:1px solid #E5E7EB;}
-  .kpi-label{font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:.05em;font-weight:600;}
-  .kpi-value{font-size:22px;font-weight:700;color:var(--navy);margin-top:4px;}
-  .kpi-sub{font-size:11px;color:#6B7280;margin-top:2px;}
+  input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:var(--navy);border-radius:50%;cursor:pointer;border:3px solid white;box-shadow:0 0 0 1px var(--navy);}
+  input[type="range"]::-moz-range-thumb{width:18px;height:18px;background:var(--navy);border-radius:50%;cursor:pointer;border:3px solid white;box-shadow:0 0 0 1px var(--navy);}
+  .kpi{padding:12px 14px;border-radius:10px;background:var(--light);border:1px solid #E5E7EB;}
+  .kpi-label{font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:.05em;font-weight:600;}
+  .kpi-value{font-size:18px;font-weight:700;color:var(--navy);margin-top:3px;}
+  .kpi-sub{font-size:10px;color:#6B7280;margin-top:2px;}
+  .kpi-big .kpi-value{font-size:22px;}
   .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
   .badge-ok{background:#D1FAE5;color:#065F46;}
   .badge-warn{background:#FEF3C7;color:#92400E;}
@@ -29,321 +32,446 @@
   .btn:hover{background:var(--navy);color:white;border-color:var(--navy);}
   .btn-primary{background:var(--navy);color:white;border-color:var(--navy);}
   .btn-primary:hover{background:#0F1A38;}
-  .slider-val{font-family:ui-monospace,monospace;font-weight:700;color:var(--navy);}
+  .slider-val{font-family:ui-monospace,monospace;font-weight:700;color:var(--navy);font-size:13px;}
   .seg{display:inline-flex;border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;background:white;}
-  .seg button{padding:6px 12px;font-size:12px;font-weight:600;color:#6B7280;background:transparent;border:none;cursor:pointer;}
+  .seg button{padding:6px 10px;font-size:11px;font-weight:600;color:#6B7280;background:transparent;border:none;cursor:pointer;}
   .seg button.active{background:var(--navy);color:white;}
   .hidden-row{display:none;}
+  .section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--navy);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E5E7EB;}
+  .row-label{font-size:13px;font-weight:500;}
+  details summary{cursor:pointer;font-weight:600;color:var(--navy);padding:6px 0;}
+  details[open] summary{margin-bottom:8px;}
+  .help{font-size:11px;color:#6B7280;font-style:italic;margin-top:2px;}
+  .text-input{padding:6px 10px;border:1px solid #E5E7EB;border-radius:6px;font-size:13px;width:100%;}
   @page { size: A4 portrait; margin: 12mm 10mm; }
   @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    body { background: white !important; padding: 0 !important; margin: 0 !important; font-size: 10pt; }
+    body { background: white !important; padding: 0 !important; margin: 0 !important; font-size: 9pt; }
     .no-print { display: none !important; }
     .max-w-7xl { max-width: 100% !important; }
-    .card { box-shadow: none !important; border: 1px solid #D1D5DB !important; page-break-inside: avoid; break-inside: avoid; margin-bottom: 8mm; }
-    .card-header { background: var(--navy) !important; color: white !important; padding: 8px 14px !important; font-size: 11pt; }
-    .grid { display: grid !important; gap: 4mm !important; }
-    .lg\\:grid-cols-3 { grid-template-columns: 1fr !important; }
-    .lg\\:col-span-1, .lg\\:col-span-2 { grid-column: span 1 / span 1 !important; }
-    .md\\:grid-cols-4 { grid-template-columns: repeat(4, 1fr) !important; }
-    .md\\:grid-cols-2 { grid-template-columns: repeat(2, 1fr) !important; }
-    .kpi { padding: 8px 10px !important; }
-    .kpi-value { font-size: 14pt !important; }
-    .kpi-label { font-size: 8pt !important; }
-    .kpi-sub { font-size: 8pt !important; }
+    .card { box-shadow: none !important; border: 1px solid #D1D5DB !important; page-break-inside: avoid; margin-bottom: 6mm; }
+    .card-header { background: var(--navy) !important; color: white !important; padding: 6px 12px !important; font-size: 10pt; }
     input[type="range"] { display: none !important; }
-    .slider-val { font-size: 10pt !important; }
-    .slider-row-label { font-size: 9pt !important; }
-    canvas { max-height: 180px !important; }
-    h1 { font-size: 18pt !important; margin-bottom: 2mm !important; }
-    table { font-size: 9pt !important; }
-    .page-break { page-break-before: always; break-before: page; }
-    .badge { font-size: 9pt !important; }
-    .print-two-col { display: grid !important; grid-template-columns: 1fr 1.6fr !important; gap: 4mm !important; }
-    .print-params .p-5 { padding: 8px !important; }
-    .print-params > div { margin-bottom: 3mm; }
-    .print-params .space-y-5 > * + * { margin-top: 2mm !important; }
-    .print-footer { display: block !important; font-size: 8pt; color: #6B7280; text-align: center; margin-top: 4mm; }
+    .kpi { padding: 6px 8px !important; }
+    .kpi-value { font-size: 11pt !important; }
+    .kpi-label { font-size: 7pt !important; }
+    .kpi-sub { font-size: 7pt !important; }
+    h1 { font-size: 16pt !important; }
+    table { font-size: 8pt !important; }
+    details { display: block !important; }
+    details > summary { display: none !important; }
+    details > div { display: block !important; }
   }
-  .print-footer { display: none; }
 </style>
 </head>
-<body class="p-6 md:p-10">
+<body class="p-4 md:p-8">
 <div class="max-w-7xl mx-auto">
 
   <!-- HEADER -->
-  <div class="mb-6 flex justify-between items-start flex-wrap gap-3">
+  <div class="mb-5 flex justify-between items-start flex-wrap gap-3">
     <div>
-      <h1 class="text-3xl font-bold" style="color:var(--navy)">Simulateur – Hôtel Alexandre III</h1>
-      <p class="text-sm text-slate-500 mt-1">15 Bd Alexandre III, Cannes &middot; 11 chambres existantes &middot; Scénario exploitation hôtelière avec mandat de gestion FDL</p>
+      <h1 class="text-2xl md:text-3xl font-bold" style="color:var(--navy)">Simulateur d'investissement hôtelier</h1>
+      <p class="text-sm text-slate-500 mt-1">Méthodologie expertale (B&E Partners) — Murs (capitalisation + DCF) + Fonds (barèmes + EBE) + financement + sortie</p>
     </div>
-    <button class="btn btn-primary no-print" onclick="window.print()">Imprimer / Exporter PDF</button>
+    <div class="flex gap-2 no-print">
+      <input type="text" id="dealName" class="text-input" placeholder="Nom du deal (ex: Hôtel X)" style="min-width:220px" />
+      <button class="btn btn-primary" onclick="window.print()">Imprimer / PDF</button>
+    </div>
   </div>
 
   <!-- PRESETS -->
-  <div class="mb-4 flex flex-wrap gap-2 no-print">
-    <span class="text-sm text-slate-600 self-center mr-2 font-semibold">Presets :</span>
-    <button class="btn" onclick="applyPreset('buyout')">Offre basse 2,5 M€ – pas de travaux</button>
-    <button class="btn" onclick="applyPreset('reno')">Cible 2,75 M€ + reno 4★ 1,5 M€</button>
-    <button class="btn" onclick="applyPreset('ext')">Cible 3,0 M€ + extension 3 M€ / 15 chbres</button>
-    <button class="btn" onclick="applyPreset('stress')">Stress test – ADR bas / Occ basse</button>
+  <div class="mb-4 flex flex-wrap gap-2 no-print items-center">
+    <span class="text-sm text-slate-600 self-center mr-2 font-semibold">Presets typologiques :</span>
+    <button class="btn" onclick="applyPreset('paris3')">Paris 3* milieu de gamme</button>
+    <button class="btn" onclick="applyPreset('paris4')">Paris 4* boutique</button>
+    <button class="btn" onclick="applyPreset('paris_eco')">Paris hôtel économique</button>
+    <button class="btn" onclick="applyPreset('cannes4')">Cannes/Nice 4*</button>
+    <button class="btn" onclick="applyPreset('region')">Région province 3*</button>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 print-two-col">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-    <!-- INPUTS -->
-    <div class="lg:col-span-1 card print-params">
-      <div class="card-header">Paramètres</div>
-      <div class="p-5 space-y-5">
+    <!-- ============ COLONNE 1 : PARAMÈTRES ============ -->
+    <div class="lg:col-span-1 space-y-4">
 
-        <div>
-          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Prix d'acquisition (FAI)</label><span class="slider-val" id="v_prix"></span></div>
-          <input type="range" id="s_prix" min="2500000" max="4300000" step="50000" value="2750000" />
-          <div class="flex justify-between text-xs text-slate-400 mt-1 no-print"><span>2,5 M€</span><span>4,3 M€</span></div>
-        </div>
-
-        <div>
-          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Travaux / CAPEX</label><span class="slider-val" id="v_capex"></span></div>
-          <input type="range" id="s_capex" min="0" max="3500000" step="100000" value="1500000" />
-          <div class="flex justify-between text-xs text-slate-400 mt-1 no-print"><span>0</span><span>3,5 M€</span></div>
-        </div>
-
-        <div>
-          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Nombre de chambres</label><span class="slider-val" id="v_chbres"></span></div>
-          <input type="range" id="s_chbres" min="11" max="18" step="1" value="11" />
-          <div class="flex justify-between text-xs text-slate-400 mt-1 no-print"><span>11</span><span>18</span></div>
-        </div>
-
-        <div>
-          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">ADR (prix moyen / nuit)</label><span class="slider-val" id="v_adr"></span></div>
-          <input type="range" id="s_adr" min="100" max="450" step="5" value="260" />
-          <div class="flex justify-between text-xs text-slate-400 mt-1 no-print"><span>100 €</span><span>450 €</span></div>
-        </div>
-
-        <div>
-          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Taux d'occupation (TO)</label><span class="slider-val" id="v_to"></span></div>
-          <input type="range" id="s_to" min="0.40" max="0.90" step="0.01" value="0.70" />
-          <div class="flex justify-between text-xs text-slate-400 mt-1 no-print"><span>40 %</span><span>90 %</span></div>
-        </div>
-
-        <div>
-          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Jours d'ouverture / an</label><span class="slider-val" id="v_jours"></span></div>
-          <input type="range" id="s_jours" min="180" max="365" step="5" value="320" />
-          <div class="flex justify-between text-xs text-slate-400 mt-1 no-print"><span>180</span><span>365</span></div>
-        </div>
-
-        <hr class="border-slate-200" />
-
-        <div>
-          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">CA F&amp;B + autres (% hébergement)</label><span class="slider-val" id="v_fb"></span></div>
-          <input type="range" id="s_fb" min="0" max="0.40" step="0.01" value="0.18" />
-        </div>
-
-        <div>
-          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Coûts directs (% CA)</label><span class="slider-val" id="v_cd"></span></div>
-          <input type="range" id="s_cd" min="0.10" max="0.35" step="0.01" value="0.22" />
-        </div>
-
-        <div>
-          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Masse salariale annuelle</label><span class="slider-val" id="v_ms"></span></div>
-          <input type="range" id="s_ms" min="100000" max="450000" step="10000" value="280000" />
-        </div>
-
-        <div>
-          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Charges fixes annuelles</label><span class="slider-val" id="v_cf"></span></div>
-          <input type="range" id="s_cf" min="40000" max="160000" step="5000" value="95000" />
-        </div>
-
-        <hr class="border-slate-200" />
-
-        <div>
-          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label" style="color:var(--gold)">Mandat de gestion FDL (% CA)</label><span class="slider-val" id="v_mgmt"></span></div>
-          <input type="range" id="s_mgmt" min="0" max="0.15" step="0.005" value="0.10" />
-          <p class="text-xs text-slate-500 mt-1 italic no-print">Facturé par FDL : cost hôtel / revenu FDL</p>
-        </div>
-
-        <div>
-          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label" style="color:var(--gold)">Ménage (% CA)</label><span class="slider-val" id="v_menage"></span></div>
-          <input type="range" id="s_menage" min="0" max="0.20" step="0.005" value="0.10" />
-          <p class="text-xs text-slate-500 mt-1 italic no-print">Prestation ménage externalisée (Femme de Ménage / Turnover)</p>
-        </div>
-
-        <hr class="border-slate-200" />
-
-        <div>
-          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">LTV bancaire</label><span class="slider-val" id="v_ltv"></span></div>
-          <input type="range" id="s_ltv" min="0.50" max="0.85" step="0.01" value="0.75" />
-        </div>
-
-        <div>
-          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Taux d'intérêt</label><span class="slider-val" id="v_taux"></span></div>
-          <input type="range" id="s_taux" min="0.030" max="0.065" step="0.001" value="0.045" />
-        </div>
-
-        <div>
-          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Durée du prêt (ans)</label><span class="slider-val" id="v_duree"></span></div>
-          <input type="range" id="s_duree" min="7" max="30" step="1" value="20" />
-        </div>
-
-        <div>
-          <div class="text-sm font-semibold mb-2 slider-row-label">Structure de la dette</div>
-          <div class="seg">
-            <button id="b_amort" class="active" onclick="setDebtType('amort')">Amortissable</button>
-            <button id="b_bullet" onclick="setDebtType('bullet')">Bullet</button>
-            <button id="b_infine" onclick="setDebtType('infine')">In fine</button>
+      <!-- ÉTABLISSEMENT -->
+      <div class="card">
+        <div class="card-header">1 · Établissement</div>
+        <div class="p-4 space-y-3">
+          <div>
+            <div class="flex justify-between"><label class="row-label">Chambres standards</label><span class="slider-val" id="v_chstd"></span></div>
+            <input type="range" id="s_chstd" min="0" max="80" step="1" value="14" />
           </div>
-          <p class="text-xs text-slate-500 mt-2 italic no-print" id="debt_help">Amortissable : capital + intérêts sur la durée. Bullet : une partie amortie, une partie remboursée in fine. In fine : intérêts seulement, capital remboursé au terme.</p>
-        </div>
-
-        <div id="balloon_row" class="hidden-row">
-          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Part bullet (% du capital remboursée in fine)</label><span class="slider-val" id="v_balloon"></span></div>
-          <input type="range" id="s_balloon" min="0.10" max="0.80" step="0.05" value="0.30" />
-          <p class="text-xs text-slate-500 mt-1 italic no-print">Le reste s'amortit normalement sur la durée.</p>
-        </div>
-
-        <hr class="border-slate-200" />
-
-        <div>
-          <div class="text-sm font-semibold mb-2 slider-row-label">Méthode de valorisation à la sortie</div>
-          <div class="seg">
-            <button id="m_mult" class="active" onclick="setExitMethod('mult')">Multiple EBITDA</button>
-            <button id="m_cap" onclick="setExitMethod('cap')">Cap rate</button>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Suites</label><span class="slider-val" id="v_chsui"></span></div>
+            <input type="range" id="s_chsui" min="0" max="20" step="1" value="2" />
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Prix moyen chambre std (TTC/nuit)</label><span class="slider-val" id="v_pxstd"></span></div>
+            <input type="range" id="s_pxstd" min="60" max="600" step="5" value="220" />
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Prix moyen suite (TTC/nuit)</label><span class="slider-val" id="v_pxsui"></span></div>
+            <input type="range" id="s_pxsui" min="100" max="1200" step="10" value="380" />
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Taux d'occupation</label><span class="slider-val" id="v_to"></span></div>
+            <input type="range" id="s_to" min="0.40" max="0.95" step="0.01" value="0.75" />
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Jours d'ouverture / an</label><span class="slider-val" id="v_jours"></span></div>
+            <input type="range" id="s_jours" min="180" max="365" step="5" value="340" />
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Surface utile (m²)</label><span class="slider-val" id="v_surf"></span></div>
+            <input type="range" id="s_surf" min="100" max="2000" step="10" value="400" />
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">TVA hébergement</label><span class="slider-val" id="v_tva"></span></div>
+            <input type="range" id="s_tva" min="0.05" max="0.20" step="0.005" value="0.10" />
           </div>
         </div>
-
-        <div id="mult_row">
-          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Multiple EBITDA de sortie</label><span class="slider-val" id="v_mult"></span></div>
-          <input type="range" id="s_mult" min="6" max="15" step="0.5" value="10" />
-        </div>
-
-        <div id="cap_row" class="hidden-row">
-          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Cap rate de sortie</label><span class="slider-val" id="v_cap"></span></div>
-          <input type="range" id="s_cap" min="0.04" max="0.10" step="0.0025" value="0.06" />
-          <p class="text-xs text-slate-500 mt-1 italic no-print">Valeur de sortie = EBITDA / Cap rate</p>
-        </div>
-
-        <div>
-          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Horizon de sortie (ans)</label><span class="slider-val" id="v_horizon"></span></div>
-          <input type="range" id="s_horizon" min="3" max="15" step="1" value="5" />
-        </div>
-
       </div>
+
+      <!-- ACQUISITION -->
+      <div class="card">
+        <div class="card-header">2 · Acquisition &amp; CAPEX</div>
+        <div class="p-4 space-y-3">
+          <div>
+            <div class="flex justify-between"><label class="row-label">Prix d'acquisition (FAI)</label><span class="slider-val" id="v_prix"></span></div>
+            <input type="range" id="s_prix" min="500000" max="20000000" step="50000" value="3000000" />
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Frais de mutation (% du prix)</label><span class="slider-val" id="v_fraisM"></span></div>
+            <input type="range" id="s_fraisM" min="0.02" max="0.10" step="0.005" value="0.07" />
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Travaux / CAPEX</label><span class="slider-val" id="v_capex"></span></div>
+            <input type="range" id="s_capex" min="0" max="10000000" step="50000" value="1500000" />
+          </div>
+        </div>
+      </div>
+
+      <!-- EXPLOITATION -->
+      <div class="card">
+        <div class="card-header">3 · Exploitation &amp; charges</div>
+        <div class="p-4 space-y-3">
+          <div>
+            <div class="flex justify-between"><label class="row-label">CA F&amp;B + autres (% hébergement)</label><span class="slider-val" id="v_fb"></span></div>
+            <input type="range" id="s_fb" min="0" max="0.50" step="0.01" value="0.18" />
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Coûts directs (% CA)</label><span class="slider-val" id="v_cd"></span></div>
+            <input type="range" id="s_cd" min="0.10" max="0.40" step="0.01" value="0.22" />
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Masse salariale annuelle</label><span class="slider-val" id="v_ms"></span></div>
+            <input type="range" id="s_ms" min="50000" max="1500000" step="10000" value="350000" />
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Charges fixes annuelles</label><span class="slider-val" id="v_cf"></span></div>
+            <input type="range" id="s_cf" min="20000" max="400000" step="5000" value="120000" />
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label" style="color:var(--gold)">Mandat gestion / honoraires (% CA)</label><span class="slider-val" id="v_mgmt"></span></div>
+            <input type="range" id="s_mgmt" min="0" max="0.20" step="0.005" value="0.05" />
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label" style="color:var(--gold)">Ménage externalisé (% CA)</label><span class="slider-val" id="v_menage"></span></div>
+            <input type="range" id="s_menage" min="0" max="0.20" step="0.005" value="0.08" />
+          </div>
+        </div>
+      </div>
+
+      <!-- MÉTHODE HÔTELIÈRE / LOYER ADMISSIBLE -->
+      <div class="card">
+        <div class="card-header card-header-gold">4 · Méthode hôtelière (loyer admissible)</div>
+        <div class="p-4 space-y-3">
+          <p class="help no-print">Calcul du loyer théorique selon la méthode IFEI 2016 — base de la valorisation des murs.</p>
+          <div>
+            <div class="flex justify-between"><label class="row-label">% CA passant par OTA</label><span class="slider-val" id="v_pctOTA"></span></div>
+            <input type="range" id="s_pctOTA" min="0" max="1" step="0.05" value="0.80" />
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Commissions OTA (taux)</label><span class="slider-val" id="v_commOTA"></span></div>
+            <input type="range" id="s_commOTA" min="0.08" max="0.25" step="0.005" value="0.13" />
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Taux d'effort (loyer / CA réalisable)</label><span class="slider-val" id="v_effort"></span></div>
+            <input type="range" id="s_effort" min="0.08" max="0.30" step="0.005" value="0.155" />
+            <p class="help no-print">Paris 3*-4* : 14-17% · 5*/Palace : 11-14% · Para-hôtelier : 25-35% · Province 3*-4* : 11-14%</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- VALORISATION MURS -->
+      <div class="card">
+        <div class="card-header">5 · Valorisation MURS</div>
+        <div class="p-4 space-y-3">
+          <div>
+            <div class="flex justify-between"><label class="row-label">Cap rate (méthode capitalisation)</label><span class="slider-val" id="v_caprate"></span></div>
+            <input type="range" id="s_caprate" min="0.030" max="0.080" step="0.0025" value="0.0475" />
+            <p class="help no-print">Paris 3*-4* rénové : 4.50-4.75% · 5* prime : 4.00-4.25% · Province : 5.50-7.00%</p>
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Frais mutation (sortie acheteur)</label><span class="slider-val" id="v_fraisMS"></span></div>
+            <input type="range" id="s_fraisMS" min="0.02" max="0.10" step="0.005" value="0.08" />
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Honoraires de vente</label><span class="slider-val" id="v_honV"></span></div>
+            <input type="range" id="s_honV" min="0" max="0.05" step="0.005" value="0.02" />
+          </div>
+
+          <details class="mt-2">
+            <summary class="text-sm">Hypothèses DCF (avancé)</summary>
+            <div class="space-y-3 mt-2">
+              <div>
+                <div class="flex justify-between"><label class="row-label">Honoraires gestion locative</label><span class="slider-val" id="v_honG"></span></div>
+                <input type="range" id="s_honG" min="0" max="0.10" step="0.005" value="0.03" />
+              </div>
+              <div>
+                <div class="flex justify-between"><label class="row-label">Charges non récup (assurance, taxe foncière)</label><span class="slider-val" id="v_chNR"></span></div>
+                <input type="range" id="s_chNR" min="0.01" max="0.10" step="0.005" value="0.035" />
+              </div>
+              <div>
+                <div class="flex justify-between"><label class="row-label">Provisions gros travaux (Art. 606)</label><span class="slider-val" id="v_prov"></span></div>
+                <input type="range" id="s_prov" min="0" max="0.08" step="0.005" value="0.03" />
+              </div>
+              <div>
+                <div class="flex justify-between"><label class="row-label">Indexation loyer (ILC)</label><span class="slider-val" id="v_idxL"></span></div>
+                <input type="range" id="s_idxL" min="0" max="0.05" step="0.0025" value="0.025" />
+              </div>
+              <div>
+                <div class="flex justify-between"><label class="row-label">Indexation charges (inflation)</label><span class="slider-val" id="v_idxC"></span></div>
+                <input type="range" id="s_idxC" min="0" max="0.05" step="0.0025" value="0.020" />
+              </div>
+              <div>
+                <div class="flex justify-between"><label class="row-label">Taux actualisation DCF</label><span class="slider-val" id="v_taxAct"></span></div>
+                <input type="range" id="s_taxAct" min="0.030" max="0.080" step="0.0025" value="0.0475" />
+              </div>
+              <div>
+                <div class="flex justify-between"><label class="row-label">Cap rate de sortie DCF</label><span class="slider-val" id="v_caxSort"></span></div>
+                <input type="range" id="s_caxSort" min="0.030" max="0.090" step="0.0025" value="0.0525" />
+              </div>
+              <div>
+                <div class="flex justify-between"><label class="row-label">Horizon DCF (ans)</label><span class="slider-val" id="v_horDCF"></span></div>
+                <input type="range" id="s_horDCF" min="5" max="15" step="1" value="9" />
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- VALORISATION FONDS -->
+      <div class="card">
+        <div class="card-header card-header-gold">6 · Valorisation FONDS</div>
+        <div class="p-4 space-y-3">
+          <div>
+            <div class="flex justify-between"><label class="row-label">Multiple CA HT (barèmes pro)</label><span class="slider-val" id="v_multCA"></span></div>
+            <input type="range" id="s_multCA" min="1.5" max="6.0" step="0.1" value="3.5" />
+            <p class="help no-print">Paris éco : 3.0-3.2× · Paris 3* : 3.2-3.5× · Paris 4* : 3.5-4.0× · Paris moy 2024 : 4.6×</p>
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Multiple EBE (méthode comptable)</label><span class="slider-val" id="v_multEBE"></span></div>
+            <input type="range" id="s_multEBE" min="6" max="18" step="0.5" value="12" />
+            <p class="help no-print">Hôtellerie milieu de gamme Paris : 11-13× · 4*-5* : 12-15× · Province : 8-11×</p>
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">EBE potentiel (% du CA HT)</label><span class="slider-val" id="v_ebePctCA"></span></div>
+            <input type="range" id="s_ebePctCA" min="0.15" max="0.45" step="0.01" value="0.30" />
+            <p class="help no-print">Norme expertale : EBE ≈ 30% du CA HT pour milieu de gamme</p>
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Décote reprise en l'état</label><span class="slider-val" id="v_decote"></span></div>
+            <input type="range" id="s_decote" min="0" max="0.30" step="0.01" value="0.15" />
+            <p class="help no-print">Décote vs valeur à rythme de croisière (default 15%)</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- FINANCEMENT -->
+      <div class="card">
+        <div class="card-header">7 · Financement</div>
+        <div class="p-4 space-y-3">
+          <div>
+            <div class="flex justify-between"><label class="row-label">LTV bancaire</label><span class="slider-val" id="v_ltv"></span></div>
+            <input type="range" id="s_ltv" min="0.40" max="0.85" step="0.01" value="0.70" />
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Taux d'intérêt</label><span class="slider-val" id="v_taux"></span></div>
+            <input type="range" id="s_taux" min="0.025" max="0.080" step="0.001" value="0.045" />
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Durée prêt (ans)</label><span class="slider-val" id="v_duree"></span></div>
+            <input type="range" id="s_duree" min="7" max="30" step="1" value="20" />
+          </div>
+          <div>
+            <div class="row-label mb-2">Structure dette</div>
+            <div class="seg">
+              <button id="b_amort" class="active" onclick="setDebtType('amort')">Amortissable</button>
+              <button id="b_bullet" onclick="setDebtType('bullet')">Bullet</button>
+              <button id="b_infine" onclick="setDebtType('infine')">In fine</button>
+            </div>
+          </div>
+          <div id="balloon_row" class="hidden-row">
+            <div class="flex justify-between"><label class="row-label">Part bullet (% capital in fine)</label><span class="slider-val" id="v_balloon"></span></div>
+            <input type="range" id="s_balloon" min="0.10" max="0.80" step="0.05" value="0.30" />
+          </div>
+        </div>
+      </div>
+
+      <!-- SORTIE -->
+      <div class="card">
+        <div class="card-header card-header-green">8 · Sortie &amp; horizon</div>
+        <div class="p-4 space-y-3">
+          <div>
+            <div class="flex justify-between"><label class="row-label">Horizon de sortie (ans)</label><span class="slider-val" id="v_horizon"></span></div>
+            <input type="range" id="s_horizon" min="3" max="15" step="1" value="7" />
+          </div>
+          <p class="help no-print">À la sortie, on revalorise selon les mêmes méthodes (capitalisation murs + barèmes/EBE fonds) avec EBITDA stabilisé indexé.</p>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Croissance EBITDA (% par an)</label><span class="slider-val" id="v_growth"></span></div>
+            <input type="range" id="s_growth" min="-0.02" max="0.06" step="0.005" value="0.020" />
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Décote sortie (vétusté)</label><span class="slider-val" id="v_decoteExit"></span></div>
+            <input type="range" id="s_decoteExit" min="0" max="0.20" step="0.01" value="0.05" />
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <!-- RESULTS -->
-    <div class="lg:col-span-2 space-y-6">
+    <!-- ============ COLONNE 2 & 3 : RÉSULTATS ============ -->
+    <div class="lg:col-span-2 space-y-5">
 
-      <!-- BIG KPIs -->
+      <!-- VALORISATION EXPERTALE (top) -->
       <div class="card">
         <div class="card-header flex justify-between items-center">
-          <span>Résultats – année stabilisée</span>
-          <span id="verdict" class="badge badge-ok">À calibrer</span>
+          <span>Valorisation expertale — synthèse Murs + Fonds</span>
+          <span id="valVerdict" class="badge"></span>
         </div>
-        <div class="p-5">
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div class="kpi"><div class="kpi-label">CA total</div><div class="kpi-value" id="k_ca"></div><div class="kpi-sub" id="k_revpar"></div></div>
-            <div class="kpi"><div class="kpi-label">EBITDA hôtel</div><div class="kpi-value" id="k_ebitda"></div><div class="kpi-sub" id="k_margin"></div></div>
-            <div class="kpi"><div class="kpi-label">DSCR</div><div class="kpi-value" id="k_dscr"></div><div class="kpi-sub" id="k_dscr_sub"></div></div>
-            <div class="kpi"><div class="kpi-label">Cash-flow après dette</div><div class="kpi-value" id="k_cf"></div><div class="kpi-sub">hôtel seul</div></div>
-          </div>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
-            <div class="kpi" style="background:#ECFDF5;border-color:#86EFAC"><div class="kpi-label" style="color:var(--green)">ROI brut</div><div class="kpi-value" id="k_roi"></div><div class="kpi-sub">EBITDA / Investissement</div></div>
-            <div class="kpi" style="background:#ECFDF5;border-color:#86EFAC"><div class="kpi-label" style="color:var(--green)">ROE leveraged</div><div class="kpi-value" id="k_roe"></div><div class="kpi-sub">CF FDL / Equity</div></div>
-            <div class="kpi"><div class="kpi-label">Investissement total</div><div class="kpi-value" id="k_inv"></div><div class="kpi-sub" id="k_prix_chbre"></div></div>
-            <div class="kpi"><div class="kpi-label">Equity requis</div><div class="kpi-value" id="k_equity"></div><div class="kpi-sub" id="k_coc"></div></div>
-          </div>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
-            <div class="kpi" style="background:#FEF7E6;border-color:#F4D488"><div class="kpi-label" style="color:var(--gold)">Revenu mandat FDL</div><div class="kpi-value" id="k_mgmt"></div><div class="kpi-sub" id="k_mgmt_sub">10% CA par défaut</div></div>
-            <div class="kpi" style="background:#FEF7E6;border-color:#F4D488"><div class="kpi-label" style="color:var(--gold)">CF total FDL (hôtel + mandat)</div><div class="kpi-value" id="k_cf_fdl"></div><div class="kpi-sub">consolidé</div></div>
-            <div class="kpi"><div class="kpi-label">Service de la dette</div><div class="kpi-value" id="k_annuite"></div><div class="kpi-sub" id="k_annuite_sub">annuel</div></div>
-            <div class="kpi"><div class="kpi-label">Mensualité</div><div class="kpi-value" id="k_mens"></div><div class="kpi-sub" id="k_mens_sub"></div></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- EXIT / FINAL CFs -->
-      <div class="card">
-        <div class="card-header flex justify-between items-center">
-          <span>Sortie &amp; cash-flows finaux</span>
-          <span id="exit_verdict" class="badge badge-ok"></span>
-        </div>
-        <div class="p-5">
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div class="kpi"><div class="kpi-label">Valeur de sortie</div><div class="kpi-value" id="k_exit"></div><div class="kpi-sub" id="k_exit_method"></div></div>
-            <div class="kpi"><div class="kpi-label">Dette résiduelle</div><div class="kpi-value" id="k_dette_res"></div><div class="kpi-sub" id="k_dette_res_sub"></div></div>
-            <div class="kpi"><div class="kpi-label">Net equity sortie</div><div class="kpi-value" id="k_net_exit"></div><div class="kpi-sub">après remboursement</div></div>
-            <div class="kpi"><div class="kpi-label">Cumul CF FDL</div><div class="kpi-value" id="k_cum_cf"></div><div class="kpi-sub" id="k_cum_cf_sub"></div></div>
+        <div class="p-4">
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div class="kpi" style="background:#EEF2FF;border-color:#A5B4FC"><div class="kpi-label">Valeur MURS (moyenne)</div><div class="kpi-value" id="k_valMurs"></div><div class="kpi-sub" id="k_valMursPm"></div></div>
+            <div class="kpi" style="background:#FEF7E6;border-color:#F4D488"><div class="kpi-label" style="color:var(--gold)">Valeur FONDS (moyenne)</div><div class="kpi-value" id="k_valFonds"></div><div class="kpi-sub" id="k_valFondsPm"></div></div>
+            <div class="kpi kpi-big" style="background:#ECFDF5;border-color:#86EFAC"><div class="kpi-label" style="color:var(--green)">VALEUR TOTALE Murs+Fonds</div><div class="kpi-value" id="k_valTotal"></div><div class="kpi-sub" id="k_valTotalPm"></div></div>
           </div>
           <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
-            <div class="kpi" style="background:#ECFDF5;border-color:#86EFAC"><div class="kpi-label" style="color:var(--green)">Multiple equity (MOIC)</div><div class="kpi-value" id="k_moic"></div><div class="kpi-sub" id="k_moic_sub"></div></div>
-            <div class="kpi" style="background:#ECFDF5;border-color:#86EFAC"><div class="kpi-label" style="color:var(--green)">TRI equity (annualisé)</div><div class="kpi-value" id="k_irr"></div><div class="kpi-sub" id="k_irr_sub"></div></div>
-            <div class="kpi"><div class="kpi-label">Cash-on-cash sortie</div><div class="kpi-value" id="k_coc_total"></div><div class="kpi-sub">(equity sortie + cumul CF) / equity</div></div>
+            <div class="kpi"><div class="kpi-label">Vs prix d'acquisition</div><div class="kpi-value" id="k_vsPrix"></div><div class="kpi-sub" id="k_vsPrixSub">Comparaison méthodologie expertale vs prix proposé</div></div>
+            <div class="kpi"><div class="kpi-label">Loyer admissible</div><div class="kpi-value" id="k_loyer"></div><div class="kpi-sub" id="k_loyerSub">Méthode hôtelière IFEI</div></div>
+            <div class="kpi"><div class="kpi-label">Cross-check Murs+Fonds vs CA</div><div class="kpi-value" id="k_xCA"></div><div class="kpi-sub">Réf. Paris 2025 : 9.5× · Province : 5-7×</div></div>
           </div>
         </div>
       </div>
 
-      <!-- P&L DETAIL -->
-      <div class="card">
-        <div class="card-header">Compte de résultat stabilisé</div>
-        <div class="p-5">
-          <table class="w-full text-sm">
-            <thead>
-              <tr class="border-b border-slate-200">
-                <th class="text-left py-2 font-semibold">Poste</th>
-                <th class="text-right py-2 font-semibold">Montant (€)</th>
-                <th class="text-right py-2 font-semibold">% CA</th>
-              </tr>
-            </thead>
-            <tbody id="pnl_body"></tbody>
-          </table>
-        </div>
-      </div>
+      <!-- DÉTAIL MÉTHODES -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-      <!-- CHART + DEBT -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- DÉTAIL MURS -->
         <div class="card">
-          <div class="card-header">Sensibilité EBITDA vs ADR</div>
-          <div class="p-5"><canvas id="chart_sens" height="200"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-header">Financement &amp; dette</div>
-          <div class="p-5">
+          <div class="card-header">Détail valorisation MURS</div>
+          <div class="p-4">
             <table class="w-full text-sm">
-              <tbody id="debt_body"></tbody>
+              <tbody id="murs_body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- DÉTAIL FONDS -->
+        <div class="card">
+          <div class="card-header card-header-gold">Détail valorisation FONDS</div>
+          <div class="p-4">
+            <table class="w-full text-sm">
+              <tbody id="fonds_body"></tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- CHART CASH-FLOW -->
+      <!-- KPIs EXPLOITATION -->
       <div class="card">
-        <div class="card-header">Timeline cash-flow (avec ramp-up &amp; sortie)</div>
-        <div class="p-5"><canvas id="chart_cf" height="140"></canvas></div>
+        <div class="card-header flex justify-between items-center">
+          <span>KPIs exploitation — année stabilisée</span>
+          <span id="verdict" class="badge badge-ok">À calibrer</span>
+        </div>
+        <div class="p-4">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="kpi"><div class="kpi-label">CA total</div><div class="kpi-value" id="k_ca"></div><div class="kpi-sub" id="k_revpar"></div></div>
+            <div class="kpi"><div class="kpi-label">EBITDA</div><div class="kpi-value" id="k_ebitda"></div><div class="kpi-sub" id="k_margin"></div></div>
+            <div class="kpi"><div class="kpi-label">DSCR</div><div class="kpi-value" id="k_dscr"></div><div class="kpi-sub" id="k_dscr_sub"></div></div>
+            <div class="kpi"><div class="kpi-label">CF après dette</div><div class="kpi-value" id="k_cf"></div><div class="kpi-sub">hôtel</div></div>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+            <div class="kpi" style="background:#ECFDF5;border-color:#86EFAC"><div class="kpi-label" style="color:var(--green)">ROI brut</div><div class="kpi-value" id="k_roi"></div><div class="kpi-sub">EBITDA / Invest</div></div>
+            <div class="kpi" style="background:#ECFDF5;border-color:#86EFAC"><div class="kpi-label" style="color:var(--green)">ROE</div><div class="kpi-value" id="k_roe"></div><div class="kpi-sub">CF / Equity</div></div>
+            <div class="kpi"><div class="kpi-label">Investissement total</div><div class="kpi-value" id="k_inv"></div><div class="kpi-sub" id="k_pxClef"></div></div>
+            <div class="kpi"><div class="kpi-label">Equity requis</div><div class="kpi-value" id="k_equity"></div><div class="kpi-sub" id="k_dette"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SORTIE -->
+      <div class="card">
+        <div class="card-header card-header-green flex justify-between items-center">
+          <span>Cash-flows finaux &amp; sortie</span>
+          <span id="exit_verdict" class="badge"></span>
+        </div>
+        <div class="p-4">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="kpi"><div class="kpi-label">Valeur de sortie (Murs+Fonds)</div><div class="kpi-value" id="k_exit"></div><div class="kpi-sub" id="k_exitSub"></div></div>
+            <div class="kpi"><div class="kpi-label">Dette résiduelle</div><div class="kpi-value" id="k_dette_res"></div><div class="kpi-sub" id="k_dette_res_sub"></div></div>
+            <div class="kpi"><div class="kpi-label">Net equity sortie</div><div class="kpi-value" id="k_net_exit"></div><div class="kpi-sub">après remboursement</div></div>
+            <div class="kpi"><div class="kpi-label">Cumul CF FDL</div><div class="kpi-value" id="k_cum_cf"></div><div class="kpi-sub" id="k_cum_cf_sub"></div></div>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
+            <div class="kpi" style="background:#ECFDF5;border-color:#86EFAC"><div class="kpi-label" style="color:var(--green)">MOIC equity</div><div class="kpi-value" id="k_moic"></div><div class="kpi-sub" id="k_moic_sub"></div></div>
+            <div class="kpi" style="background:#ECFDF5;border-color:#86EFAC"><div class="kpi-label" style="color:var(--green)">TRI equity</div><div class="kpi-value" id="k_irr"></div><div class="kpi-sub" id="k_irr_sub"></div></div>
+            <div class="kpi"><div class="kpi-label">Plus-value murs+fonds</div><div class="kpi-value" id="k_pv"></div><div class="kpi-sub" id="k_pvSub"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- P&L -->
+      <div class="card">
+        <div class="card-header">Compte de résultat stabilisé</div>
+        <div class="p-4">
+          <table class="w-full text-sm">
+            <tbody id="pnl_body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CHART CF -->
+      <div class="card">
+        <div class="card-header">Timeline cash-flow + sortie</div>
+        <div class="p-4"><canvas id="chart_cf" height="120"></canvas></div>
+      </div>
+
+      <!-- CHART SENS -->
+      <div class="card">
+        <div class="card-header">Sensibilité valeur murs+fonds vs cap rate &amp; multiple EBE</div>
+        <div class="p-4"><canvas id="chart_sens" height="160"></canvas></div>
       </div>
 
     </div>
   </div>
 
-  <div class="print-footer">
-    Simulateur Hôtel Alexandre III &middot; Groupe FDL &middot; Julien Madar &middot; Imprimé le <span id="today"></span>
-  </div>
-
   <div class="mt-6 text-xs text-slate-400 text-center no-print">
-    Simulateur Hôtel Alexandre III &middot; Groupe FDL &middot; Construit avril 2026
+    Simulateur d'investissement hôtelier · Méthodologie B&E Partners (rapports d'expertise) · Construit avril 2026
   </div>
 </div>
 
 <script>
-// ========= HELPERS =========
-const fmt = n => new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);
-const pct = n => (n*100).toFixed(1)+' %';
+const fmt = n => isNaN(n) || !isFinite(n) ? '—' : new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);
+const pct = n => isNaN(n) || !isFinite(n) ? '—' : (n*100).toFixed(1)+' %';
+const num = n => isNaN(n) || !isFinite(n) ? '—' : n.toFixed(2);
 
-// ========= STATE =========
-const ids = ['prix','capex','chbres','adr','to','jours','fb','cd','ms','cf','mgmt','menage','ltv','taux','duree','balloon','mult','cap','horizon'];
+const ids = ['chstd','chsui','pxstd','pxsui','to','jours','surf','tva','prix','fraisM','capex','fb','cd','ms','cf','mgmt','menage','pctOTA','commOTA','effort','caprate','fraisMS','honV','honG','chNR','prov','idxL','idxC','taxAct','caxSort','horDCF','multCA','multEBE','ebePctCA','decote','ltv','taux','duree','balloon','horizon','growth','decoteExit'];
 const inputs = {};
 ids.forEach(id => inputs[id] = document.getElementById('s_'+id));
 
-let debtType = 'amort'; // 'amort', 'bullet', or 'infine'
+let debtType = 'amort';
 function setDebtType(t){
   debtType = t;
   document.getElementById('b_amort').classList.toggle('active', t==='amort');
@@ -353,74 +481,56 @@ function setDebtType(t){
   compute();
 }
 
-let exitMethod = 'mult'; // 'mult' or 'cap'
-function setExitMethod(m){
-  exitMethod = m;
-  document.getElementById('m_mult').classList.toggle('active', m==='mult');
-  document.getElementById('m_cap').classList.toggle('active', m==='cap');
-  document.getElementById('mult_row').className = (m==='mult') ? '' : 'hidden-row';
-  document.getElementById('cap_row').className = (m==='cap') ? '' : 'hidden-row';
-  compute();
-}
+const PRESETS = {
+  paris3: {chstd:14,chsui:2,pxstd:170,pxsui:240,to:0.78,jours:355,surf:400,tva:0.10,prix:5500000,fraisM:0.07,capex:1500000,fb:0.18,cd:0.22,ms:380000,cf:140000,mgmt:0.05,menage:0.08,pctOTA:0.80,commOTA:0.13,effort:0.155,caprate:0.0475,fraisMS:0.08,honV:0.02,honG:0.03,chNR:0.035,prov:0.03,idxL:0.025,idxC:0.020,taxAct:0.0475,caxSort:0.0525,horDCF:9,multCA:3.5,multEBE:12,ebePctCA:0.30,decote:0.15,ltv:0.70,taux:0.045,duree:20,balloon:0.30,horizon:7,growth:0.020,decoteExit:0.05},
+  paris4: {chstd:18,chsui:4,pxstd:280,pxsui:480,to:0.80,jours:355,surf:600,tva:0.10,prix:9000000,fraisM:0.07,capex:2500000,fb:0.25,cd:0.24,ms:600000,cf:200000,mgmt:0.05,menage:0.08,pctOTA:0.65,commOTA:0.13,effort:0.145,caprate:0.0425,fraisMS:0.08,honV:0.02,honG:0.03,chNR:0.035,prov:0.03,idxL:0.025,idxC:0.020,taxAct:0.0425,caxSort:0.0475,horDCF:9,multCA:3.8,multEBE:13,ebePctCA:0.32,decote:0.15,ltv:0.65,taux:0.045,duree:20,balloon:0.30,horizon:7,growth:0.025,decoteExit:0.05},
+  paris_eco: {chstd:25,chsui:0,pxstd:120,pxsui:160,to:0.75,jours:340,surf:500,tva:0.10,prix:3500000,fraisM:0.07,capex:600000,fb:0.10,cd:0.20,ms:280000,cf:100000,mgmt:0.04,menage:0.08,pctOTA:0.85,commOTA:0.15,effort:0.180,caprate:0.0500,fraisMS:0.08,honV:0.02,honG:0.03,chNR:0.035,prov:0.03,idxL:0.025,idxC:0.020,taxAct:0.0500,caxSort:0.0550,horDCF:9,multCA:3.2,multEBE:11,ebePctCA:0.28,decote:0.15,ltv:0.70,taux:0.045,duree:20,balloon:0.30,horizon:7,growth:0.015,decoteExit:0.05},
+  cannes4: {chstd:14,chsui:2,pxstd:280,pxsui:480,to:0.72,jours:300,surf:450,tva:0.10,prix:4500000,fraisM:0.07,capex:1800000,fb:0.20,cd:0.23,ms:380000,cf:130000,mgmt:0.05,menage:0.10,pctOTA:0.75,commOTA:0.13,effort:0.130,caprate:0.0500,fraisMS:0.08,honV:0.02,honG:0.03,chNR:0.035,prov:0.03,idxL:0.025,idxC:0.020,taxAct:0.0500,caxSort:0.0550,horDCF:9,multCA:3.5,multEBE:11,ebePctCA:0.30,decote:0.15,ltv:0.70,taux:0.045,duree:20,balloon:0.30,horizon:7,growth:0.020,decoteExit:0.05},
+  region: {chstd:35,chsui:5,pxstd:130,pxsui:180,to:0.65,jours:340,surf:1200,tva:0.10,prix:4000000,fraisM:0.07,capex:1200000,fb:0.30,cd:0.25,ms:500000,cf:180000,mgmt:0.04,menage:0.07,pctOTA:0.70,commOTA:0.13,effort:0.130,caprate:0.0625,fraisMS:0.08,honV:0.02,honG:0.03,chNR:0.035,prov:0.03,idxL:0.025,idxC:0.020,taxAct:0.0625,caxSort:0.0675,horDCF:9,multCA:2.8,multEBE:9,ebePctCA:0.28,decote:0.15,ltv:0.70,taux:0.045,duree:20,balloon:0.30,horizon:7,growth:0.015,decoteExit:0.05}
+};
 
-// ========= PRESETS =========
 function applyPreset(name){
-  const P = {
-    buyout:{prix:2500000,capex:0,chbres:11,adr:140,to:0.72,jours:240,fb:0.08,cd:0.20,ms:140000,cf:60000,mgmt:0.10,menage:0.10,ltv:0.75,taux:0.045,duree:20,balloon:0.30,mult:9,cap:0.07,horizon:5},
-    reno  :{prix:2750000,capex:1500000,chbres:11,adr:280,to:0.72,jours:320,fb:0.18,cd:0.22,ms:280000,cf:95000,mgmt:0.10,menage:0.10,ltv:0.75,taux:0.045,duree:20,balloon:0.30,mult:10,cap:0.06,horizon:5},
-    ext   :{prix:3000000,capex:3000000,chbres:15,adr:310,to:0.72,jours:340,fb:0.25,cd:0.24,ms:360000,cf:125000,mgmt:0.10,menage:0.10,ltv:0.75,taux:0.045,duree:25,balloon:0.30,mult:11,cap:0.055,horizon:7},
-    stress:{prix:2750000,capex:1500000,chbres:11,adr:210,to:0.60,jours:280,fb:0.15,cd:0.25,ms:280000,cf:100000,mgmt:0.10,menage:0.10,ltv:0.75,taux:0.055,duree:20,balloon:0.30,mult:8,cap:0.075,horizon:5},
-  };
-  const p = P[name]; if(!p) return;
-  ids.forEach(id => inputs[id].value = p[id]);
+  const p = PRESETS[name]; if(!p) return;
+  ids.forEach(id => { if(id in p) inputs[id].value = p[id]; });
   compute();
 }
 
-// ========= IRR (Newton-Raphson) =========
 function irr(cashflows, guess=0.10){
-  const npv = (r) => cashflows.reduce((acc, cf, t) => acc + cf / Math.pow(1+r, t), 0);
-  const dnpv = (r) => cashflows.reduce((acc, cf, t) => acc - t * cf / Math.pow(1+r, t+1), 0);
+  const npv = (r) => cashflows.reduce((a,cf,t)=>a+cf/Math.pow(1+r,t),0);
+  const dnpv = (r) => cashflows.reduce((a,cf,t)=>a-t*cf/Math.pow(1+r,t+1),0);
   let r = guess;
-  for(let i=0; i<100; i++){
-    const v = npv(r);
-    const d = dnpv(r);
-    if(Math.abs(d) < 1e-12) break;
+  for(let i=0;i<200;i++){
+    const v = npv(r), d = dnpv(r);
+    if(Math.abs(d)<1e-12) break;
     const r2 = r - v/d;
     if(!isFinite(r2)) return null;
-    if(Math.abs(r2 - r) < 1e-7) return r2;
+    if(Math.abs(r2-r)<1e-7) return r2;
     r = r2;
-    if(r < -0.99) r = -0.99;
+    if(r<-0.99) r = -0.99;
   }
   return r;
 }
 
-// ========= DEBT =========
-function debtSchedule(p){
-  const acquisition = p.prix * 1.07;
-  const invest = acquisition + p.capex;
+function debtSchedule(p, invest){
   const loan = invest * p.ltv;
   const equity = invest - loan;
   let mensual, annuite, principalEndOfYear;
-  const i = p.taux / 12;
-  const n = p.duree * 12;
-
+  const i = p.taux/12, n = p.duree*12;
   if(debtType === 'infine'){
     annuite = loan * p.taux;
     mensual = annuite / 12;
-    principalEndOfYear = (year) => year >= p.duree ? 0 : loan; // capital remboursé in fine
+    principalEndOfYear = (year) => year >= p.duree ? 0 : loan;
   } else if(debtType === 'bullet'){
     const balloonAmount = loan * p.balloon;
     const amortAmount = loan - balloonAmount;
     const mortgage = amortAmount * i / (1 - Math.pow(1+i, -n));
     const balloonInterest = balloonAmount * p.taux;
-    mensual = mortgage + balloonInterest / 12;
+    mensual = mortgage + balloonInterest/12;
     annuite = mensual * 12;
     principalEndOfYear = (year) => {
       if(year >= p.duree) return 0;
-      // principal restant amorti = amortAmount - principal payé sur 'year' années
-      // formule: solde restant après k mois = loan_init * (1 - ((1+i)^k - 1) / ((1+i)^n - 1))
-      const k = Math.min(year * 12, n);
-      const remainingAmort = amortAmount * (Math.pow(1+i, n) - Math.pow(1+i, k)) / (Math.pow(1+i, n) - 1);
+      const k = Math.min(year*12, n);
+      const remainingAmort = amortAmount * (Math.pow(1+i,n) - Math.pow(1+i,k)) / (Math.pow(1+i,n) - 1);
       return remainingAmort + balloonAmount;
     };
   } else {
@@ -428,62 +538,122 @@ function debtSchedule(p){
     annuite = mensual * 12;
     principalEndOfYear = (year) => {
       if(year >= p.duree) return 0;
-      const k = Math.min(year * 12, n);
-      return loan * (Math.pow(1+i, n) - Math.pow(1+i, k)) / (Math.pow(1+i, n) - 1);
+      const k = Math.min(year*12, n);
+      return loan * (Math.pow(1+i,n) - Math.pow(1+i,k)) / (Math.pow(1+i,n) - 1);
     };
   }
-  return { invest, acquisition, loan, equity, mensual, annuite, principalEndOfYear };
+  return {loan, equity, mensual, annuite, principalEndOfYear};
 }
 
-// ========= CORE CALC =========
 function calc(p){
-  const debt = debtSchedule(p);
-  const nights = p.chbres * p.jours * p.to;
-  const revHeberg = nights * p.adr;
-  const revFB = revHeberg * p.fb;
-  const ca = revHeberg + revFB;
+  // === Recettes hébergement ===
+  const totalChbres = p.chstd + p.chsui;
+  const caStdMaxTTC = p.chstd * p.pxstd * p.jours;
+  const caSuiMaxTTC = p.chsui * p.pxsui * p.jours;
+  const caMaxTTC = caStdMaxTTC + caSuiMaxTTC;
+  const caMaxHT = caMaxTTC / (1 + p.tva);
+  const caRealisableHT = caMaxHT * p.to;
+  const abattementOTA = caRealisableHT * p.pctOTA * p.commOTA;
+  const caHebergNet = caRealisableHT - abattementOTA;
 
+  // === CA total ===
+  const caFB = caRealisableHT * p.fb;
+  const ca = caRealisableHT + caFB;
+
+  // === Loyer admissible (méthode hôtelière) ===
+  const loyer = caHebergNet * p.effort;
+
+  // === Charges & EBITDA exploitation ===
   const coutsDirects = ca * p.cd;
   const menage = ca * p.menage;
   const masseSal = Number(p.ms);
   const chargesFixes = Number(p.cf);
   const mandat = ca * p.mgmt;
-
   const ebitda = ca - coutsDirects - menage - masseSal - chargesFixes - mandat;
   const margin = ca>0 ? ebitda/ca : 0;
-  const revpar = p.to * p.adr;
-  const prixChbre = p.prix / p.chbres;
+  const revpar = (caRealisableHT) / Math.max(1, totalChbres) / Math.max(1, p.jours);
 
+  // === Investissement ===
+  const acquisition = p.prix * (1 + p.fraisM);
+  const invest = acquisition + p.capex;
+  const pxClef = totalChbres>0 ? p.prix / totalChbres : 0;
+
+  // === Dette ===
+  const debt = debtSchedule(p, invest);
   const dscr = debt.annuite>0 ? ebitda / debt.annuite : 0;
   const cfHotel = ebitda - debt.annuite;
   const cfFDL = cfHotel + mandat;
-  const cocHotel = debt.equity>0 ? cfHotel / debt.equity : 0;
-  const cocFDL = debt.equity>0 ? cfFDL / debt.equity : 0;
+  const roi = invest>0 ? ebitda/invest : 0;
+  const roe = debt.equity>0 ? cfFDL/debt.equity : 0;
 
-  const roi = debt.invest>0 ? ebitda / debt.invest : 0;
-  const roe = debt.equity>0 ? cfFDL / debt.equity : 0;
+  // === VALORISATION MURS ===
+  // Méthode 1: capitalisation simple
+  const valMursAcq_cap = p.caprate>0 ? loyer / p.caprate : 0;
+  const valMursVendeur_cap = valMursAcq_cap * (1 - p.fraisMS);
 
-  // ===== EXIT VALUATION =====
+  // Méthode 2: DCF
+  const horDCF = Math.round(p.horDCF);
+  let cumDCFActu = 0;
+  for(let y=1; y<=horDCF; y++){
+    const loyerY = loyer * Math.pow(1+p.idxL, y-1);
+    const honGY = loyerY * p.honG;
+    const chNRY = loyerY * (1+p.idxC) * p.chNR; // simplified
+    const provY = loyerY * p.prov;
+    const netY = loyerY - honGY - chNRY - provY;
+    cumDCFActu += netY / Math.pow(1+p.taxAct, y);
+  }
+  const loyerExit = loyer * Math.pow(1+p.idxL, horDCF);
+  const valMursExit = p.caxSort>0 ? loyerExit / p.caxSort : 0;
+  const valMursExitVendeur = valMursExit * (1 - p.fraisMS);
+  const valMursExitActu = valMursExitVendeur / Math.pow(1+p.taxAct, horDCF);
+  const valMursAcq_dcf = cumDCFActu + valMursExitActu;
+  const valMursVendeur_dcf = valMursAcq_dcf * (1 - p.fraisMS - p.honV);
+
+  // Moyenne murs (vendeur)
+  const valMurs = (valMursVendeur_cap + valMursVendeur_dcf) / 2;
+  const valMursPm = p.surf>0 ? valMurs / p.surf : 0;
+
+  // === VALORISATION FONDS ===
+  const ebePotentiel = ca * p.ebePctCA;
+  const valFonds_baremes = ca * p.multCA;
+  const valFonds_ebe = ebePotentiel * p.multEBE;
+  const valFondsCroisiere = (valFonds_baremes + valFonds_ebe) / 2;
+  const valFonds = valFondsCroisiere * (1 - p.decote);
+  const valFondsPm = totalChbres>0 ? valFonds / totalChbres : 0;
+
+  // === TOTAL ===
+  const valTotal = valMurs + valFonds;
+  const valTotalPm = totalChbres>0 ? valTotal / totalChbres : 0;
+  const xCA = ca>0 ? valTotal / ca : 0;
+
+  // === SORTIE ===
   const horizon = Math.round(p.horizon);
-  const exitValue = exitMethod === 'mult' ? ebitda * p.mult : (p.cap>0 ? ebitda / p.cap : 0);
+  const ebitdaExit = ebitda * Math.pow(1+p.growth, horizon);
+  const caExit = ca * Math.pow(1+p.growth, horizon);
+  const ebePotExit = caExit * p.ebePctCA;
+  const loyerExitOp = loyer * Math.pow(1+p.idxL, horizon);
+  // Same methodology at exit
+  const valMursExitOp = p.caprate>0 ? (loyerExitOp / p.caprate) * (1 - p.fraisMS) : 0;
+  const valFondsExitOp_baremes = caExit * p.multCA;
+  const valFondsExitOp_ebe = ebePotExit * p.multEBE;
+  const valFondsExitOp = (valFondsExitOp_baremes + valFondsExitOp_ebe) / 2;
+  const exitValueGross = (valMursExitOp + valFondsExitOp) * (1 - p.decoteExit);
   const detteResiduelle = debt.principalEndOfYear(horizon);
-  const netEquityExit = exitValue - detteResiduelle;
+  const netEquityExit = exitValueGross - detteResiduelle;
 
-  // Cumul CF over horizon (with ramp-up factors)
+  // Cash flows over horizon (with ramp-up)
   const factors = [];
   for(let y=1; y<=horizon; y++){
     let f;
     if(y===1) f = 0.30;
-    else if(y===2) f = 0.80;
-    else if(y===3) f = 1.00;
-    else if(y===4) f = 1.02;
-    else f = 1.00 + 0.02 * (y-3);
+    else if(y===2) f = 0.75;
+    else if(y===3) f = 0.95;
+    else f = 1.00 * Math.pow(1+p.growth, y-3);
     factors.push(f);
   }
   const yearlyCFFDL = factors.map(f => (ebitda * f - mandat * (f-1)) - debt.annuite + mandat * f);
   const cumCFFDL = yearlyCFFDL.reduce((a,b)=>a+b, 0);
 
-  // IRR computation
   const cashflows = [-debt.equity];
   factors.forEach((f, idx) => {
     let cf = yearlyCFFDL[idx];
@@ -492,227 +662,248 @@ function calc(p){
   });
   const irrVal = irr(cashflows);
   const moic = debt.equity>0 ? (cumCFFDL + netEquityExit) / debt.equity : 0;
-  const cocTotal = debt.equity>0 ? (cumCFFDL + netEquityExit) / debt.equity : 0;
+  const plusValue = exitValueGross - valTotal;
 
   return {
-    ...debt,
-    nights, revHeberg, revFB, ca,
-    coutsDirects, menage, masseSal, chargesFixes, mandat,
-    ebitda, margin, revpar, prixChbre,
-    dscr, cfHotel, cfFDL, cocHotel, cocFDL,
-    roi, roe,
-    horizon, exitValue, detteResiduelle, netEquityExit,
-    yearlyCFFDL, cumCFFDL, irr: irrVal, moic, cocTotal, factors
+    totalChbres, caRealisableHT, caHebergNet, caFB, ca, loyer,
+    coutsDirects, menage, masseSal, chargesFixes, mandat, ebitda, margin, revpar,
+    acquisition, invest, pxClef,
+    ...debt, dscr, cfHotel, cfFDL, roi, roe,
+    valMursAcq_cap, valMursVendeur_cap,
+    valMursAcq_dcf, valMursVendeur_dcf, cumDCFActu, valMursExitActu,
+    valMurs, valMursPm,
+    ebePotentiel, valFonds_baremes, valFonds_ebe, valFondsCroisiere, valFonds, valFondsPm,
+    valTotal, valTotalPm, xCA,
+    horizon, ebitdaExit, exitValueGross, detteResiduelle, netEquityExit,
+    yearlyCFFDL, cumCFFDL, irr: irrVal, moic, plusValue, factors
   };
 }
 
-// ========= CHARTS =========
-let chartSens, chartCF;
+// === RENDER ===
+function render(p, r){
+  // Sliders
+  document.getElementById('v_chstd').textContent = p.chstd;
+  document.getElementById('v_chsui').textContent = p.chsui;
+  document.getElementById('v_pxstd').textContent = p.pxstd + ' € TTC';
+  document.getElementById('v_pxsui').textContent = p.pxsui + ' € TTC';
+  document.getElementById('v_to').textContent = pct(p.to);
+  document.getElementById('v_jours').textContent = p.jours + ' j';
+  document.getElementById('v_surf').textContent = p.surf + ' m²';
+  document.getElementById('v_tva').textContent = pct(p.tva);
+  document.getElementById('v_prix').textContent = fmt(p.prix);
+  document.getElementById('v_fraisM').textContent = pct(p.fraisM);
+  document.getElementById('v_capex').textContent = fmt(p.capex);
+  document.getElementById('v_fb').textContent = pct(p.fb);
+  document.getElementById('v_cd').textContent = pct(p.cd);
+  document.getElementById('v_ms').textContent = fmt(p.ms);
+  document.getElementById('v_cf').textContent = fmt(p.cf);
+  document.getElementById('v_mgmt').textContent = pct(p.mgmt);
+  document.getElementById('v_menage').textContent = pct(p.menage);
+  document.getElementById('v_pctOTA').textContent = pct(p.pctOTA);
+  document.getElementById('v_commOTA').textContent = pct(p.commOTA);
+  document.getElementById('v_effort').textContent = pct(p.effort);
+  document.getElementById('v_caprate').textContent = pct(p.caprate);
+  document.getElementById('v_fraisMS').textContent = pct(p.fraisMS);
+  document.getElementById('v_honV').textContent = pct(p.honV);
+  document.getElementById('v_honG').textContent = pct(p.honG);
+  document.getElementById('v_chNR').textContent = pct(p.chNR);
+  document.getElementById('v_prov').textContent = pct(p.prov);
+  document.getElementById('v_idxL').textContent = pct(p.idxL);
+  document.getElementById('v_idxC').textContent = pct(p.idxC);
+  document.getElementById('v_taxAct').textContent = pct(p.taxAct);
+  document.getElementById('v_caxSort').textContent = pct(p.caxSort);
+  document.getElementById('v_horDCF').textContent = Math.round(p.horDCF) + ' ans';
+  document.getElementById('v_multCA').textContent = p.multCA.toFixed(1) + 'x';
+  document.getElementById('v_multEBE').textContent = p.multEBE.toFixed(1) + 'x';
+  document.getElementById('v_ebePctCA').textContent = pct(p.ebePctCA);
+  document.getElementById('v_decote').textContent = pct(p.decote);
+  document.getElementById('v_ltv').textContent = pct(p.ltv);
+  document.getElementById('v_taux').textContent = pct(p.taux);
+  document.getElementById('v_duree').textContent = p.duree + ' ans';
+  document.getElementById('v_balloon').textContent = pct(p.balloon);
+  document.getElementById('v_horizon').textContent = Math.round(p.horizon) + ' ans';
+  document.getElementById('v_growth').textContent = pct(p.growth);
+  document.getElementById('v_decoteExit').textContent = pct(p.decoteExit);
 
-function drawSens(p){
-  const ctx = document.getElementById('chart_sens').getContext('2d');
-  const adrs = [150,200,250,300,350,400];
-  const toList = [0.55,0.65,0.75];
-  const datasets = toList.map((to,idx) => {
+  // Top valuation panel
+  document.getElementById('k_valMurs').textContent = fmt(r.valMurs);
+  document.getElementById('k_valMursPm').textContent = fmt(r.valMursPm) + ' / m² · ' + fmt(r.valMurs/Math.max(1,r.totalChbres)) + ' / clé';
+  document.getElementById('k_valFonds').textContent = fmt(r.valFonds);
+  document.getElementById('k_valFondsPm').textContent = fmt(r.valFondsPm) + ' / clé';
+  document.getElementById('k_valTotal').textContent = fmt(r.valTotal);
+  document.getElementById('k_valTotalPm').textContent = fmt(r.valTotalPm) + ' / clé';
+
+  const ecart = r.valTotal - p.prix;
+  const ecartPct = p.prix>0 ? ecart/p.prix : 0;
+  document.getElementById('k_vsPrix').textContent = (ecart>=0?'+':'') + fmt(ecart) + ' (' + (ecartPct>=0?'+':'') + pct(ecartPct) + ')';
+  document.getElementById('k_loyer').textContent = fmt(r.loyer);
+  document.getElementById('k_loyerSub').textContent = pct(p.effort) + ' du CA réalisable net OTA';
+  document.getElementById('k_xCA').textContent = num(r.xCA) + 'x CA';
+
+  // Verdict valorisation
+  const vBadge = document.getElementById('valVerdict');
+  if(ecartPct >= 0.10){ vBadge.className='badge badge-ok'; vBadge.textContent='Sous-évalué — opportunité'; }
+  else if(ecartPct >= -0.05){ vBadge.className='badge badge-ok'; vBadge.textContent='Cohérent marché'; }
+  else if(ecartPct >= -0.15){ vBadge.className='badge badge-warn'; vBadge.textContent='Surcote modérée'; }
+  else { vBadge.className='badge badge-ko'; vBadge.textContent='Surcote significative'; }
+
+  // Détail murs
+  const mursTable = [
+    ['<b>Méthode hôtelière (loyer)</b>', '', true],
+    ['CA hébergement réalisable', fmt(r.caRealisableHT), false],
+    ['CA après abattement OTA', fmt(r.caHebergNet), false],
+    ['× Taux d\'effort (' + pct(p.effort) + ')', '', false],
+    ['<b>Loyer admissible</b>', '<b>' + fmt(r.loyer) + '</b>', true],
+    ['', '', false],
+    ['<b>Méthode capitalisation</b>', '', true],
+    ['Loyer / Cap rate (' + pct(p.caprate) + ')', fmt(r.valMursAcq_cap) + ' (acq.)', false],
+    ['Net vendeur (-' + pct(p.fraisMS) + ' frais)', '<b>' + fmt(r.valMursVendeur_cap) + '</b>', true],
+    ['', '', false],
+    ['<b>Méthode DCF (' + Math.round(p.horDCF) + ' ans)</b>', '', true],
+    ['Cumul flux actualisés', fmt(r.cumDCFActu), false],
+    ['+ Valeur résiduelle actualisée', fmt(r.valMursExitActu), false],
+    ['Net vendeur DCF', '<b>' + fmt(r.valMursVendeur_dcf) + '</b>', true],
+    ['', '', false],
+    ['<b style="color:var(--green)">Moyenne MURS</b>', '<b style="color:var(--green)">' + fmt(r.valMurs) + '</b>', true],
+  ];
+  document.getElementById('murs_body').innerHTML = mursTable.map(([k,v,emph]) => `<tr><td class="py-1 ${emph?'pt-2':''}">${k}</td><td class="text-right py-1 font-mono">${v}</td></tr>`).join('');
+
+  // Détail fonds
+  const fondsTable = [
+    ['<b>Méthode des barèmes pro</b>', '', true],
+    ['CA HT × multiple (' + p.multCA.toFixed(1) + 'x)', fmt(r.valFonds_baremes), false],
+    ['', '', false],
+    ['<b>Méthode EBE</b>', '', true],
+    ['EBE potentiel (' + pct(p.ebePctCA) + ' du CA)', fmt(r.ebePotentiel), false],
+    ['× Multiple EBE (' + p.multEBE.toFixed(1) + 'x)', fmt(r.valFonds_ebe), false],
+    ['', '', false],
+    ['<b>Moyenne fonds (rythme croisière)</b>', '<b>' + fmt(r.valFondsCroisiere) + '</b>', true],
+    ['Décote reprise en l\'état (-' + pct(p.decote) + ')', fmt(-r.valFondsCroisiere * p.decote), false],
+    ['<b style="color:var(--green)">FONDS retenu</b>', '<b style="color:var(--green)">' + fmt(r.valFonds) + '</b>', true],
+  ];
+  document.getElementById('fonds_body').innerHTML = fondsTable.map(([k,v,emph]) => `<tr><td class="py-1 ${emph?'pt-2':''}">${k}</td><td class="text-right py-1 font-mono">${v}</td></tr>`).join('');
+
+  // Exploitation KPIs
+  document.getElementById('k_ca').textContent = fmt(r.ca);
+  document.getElementById('k_revpar').textContent = 'RevPAR ' + fmt(r.revpar) + '/nuit';
+  document.getElementById('k_ebitda').textContent = fmt(r.ebitda);
+  document.getElementById('k_margin').textContent = 'Marge ' + pct(r.margin);
+  document.getElementById('k_dscr').textContent = num(r.dscr) + 'x';
+  document.getElementById('k_dscr_sub').textContent = r.dscr>=1.2?'bancable':r.dscr>=1?'limite':'non-bancable';
+  document.getElementById('k_cf').textContent = fmt(r.cfHotel);
+  document.getElementById('k_roi').textContent = pct(r.roi);
+  document.getElementById('k_roe').textContent = pct(r.roe);
+  document.getElementById('k_inv').textContent = fmt(r.invest);
+  document.getElementById('k_pxClef').textContent = fmt(r.pxClef) + ' / clé';
+  document.getElementById('k_equity').textContent = fmt(r.equity);
+  document.getElementById('k_dette').textContent = 'Emprunt ' + fmt(r.loan);
+
+  // Verdict exploitation
+  const eBadge = document.getElementById('verdict');
+  if(r.dscr >= 1.25 && r.cfFDL > 0){ eBadge.className='badge badge-ok'; eBadge.textContent='Viable'; }
+  else if(r.dscr >= 1.0){ eBadge.className='badge badge-warn'; eBadge.textContent='Limite'; }
+  else { eBadge.className='badge badge-ko'; eBadge.textContent='Non-bancable'; }
+
+  // Sortie KPIs
+  document.getElementById('k_exit').textContent = fmt(r.exitValueGross);
+  document.getElementById('k_exitSub').textContent = 'Méthodologie expertale @ an ' + r.horizon;
+  document.getElementById('k_dette_res').textContent = fmt(r.detteResiduelle);
+  document.getElementById('k_dette_res_sub').textContent = 'à année ' + r.horizon;
+  document.getElementById('k_net_exit').textContent = fmt(r.netEquityExit);
+  document.getElementById('k_cum_cf').textContent = fmt(r.cumCFFDL);
+  document.getElementById('k_cum_cf_sub').textContent = 'sur ' + r.horizon + ' ans';
+  document.getElementById('k_moic').textContent = num(r.moic) + 'x';
+  document.getElementById('k_moic_sub').textContent = 'sur equity ' + fmt(r.equity);
+  document.getElementById('k_irr').textContent = r.irr === null ? 'N/A' : pct(r.irr);
+  document.getElementById('k_irr_sub').textContent = 'sortie an ' + r.horizon;
+  document.getElementById('k_pv').textContent = (r.plusValue>=0?'+':'') + fmt(r.plusValue);
+  document.getElementById('k_pvSub').textContent = 'sortie - acquisition';
+
+  const exBadge = document.getElementById('exit_verdict');
+  if(r.irr === null || !isFinite(r.irr)){ exBadge.className='badge badge-ko'; exBadge.textContent='TRI N/A'; }
+  else if(r.irr >= 0.15){ exBadge.className='badge badge-ok'; exBadge.textContent='TRI > 15 % – attractif'; }
+  else if(r.irr >= 0.08){ exBadge.className='badge badge-warn'; exBadge.textContent='TRI 8-15 %'; }
+  else if(r.irr >= 0){ exBadge.className='badge badge-warn'; exBadge.textContent='TRI faible'; }
+  else { exBadge.className='badge badge-ko'; exBadge.textContent='TRI négatif'; }
+
+  // P&L
+  const pnl = [
+    ['CA hébergement (HT, post OTA)', r.caHebergNet, null, false],
+    ['CA F&B + autres', r.caFB, null, false],
+    ['<b>CA total</b>', r.ca, r.ca, true],
+    ['Coûts directs (' + pct(p.cd) + ')', -r.coutsDirects, r.ca, false],
+    ['Ménage externalisé', -r.menage, r.ca, false],
+    ['Masse salariale', -r.masseSal, r.ca, false],
+    ['Charges fixes', -r.chargesFixes, r.ca, false],
+    ['Mandat / honoraires gestion', -r.mandat, r.ca, false],
+    ['<b>EBITDA</b>', r.ebitda, r.ca, true],
+    ['Service de la dette (annuel)', -r.annuite, r.ca, false],
+    ['<b>Cash-flow après dette</b>', r.cfHotel, r.ca, true],
+    ['+ Mandat (revenu FDL)', r.mandat, r.ca, false],
+    ['<b>CF FDL consolidé</b>', r.cfFDL, r.ca, true],
+  ];
+  document.getElementById('pnl_body').innerHTML = pnl.map(([lbl,val,base,emph]) => {
+    const pctStr = base && base>0 ? pct(val/base) : '';
+    const color = val>=0 ? 'color:inherit' : 'color:#B91C1C';
+    const bg = emph ? 'background:#F2F4F8' : '';
+    return `<tr style="${bg}"><td class="py-1.5 ${emph?'':'pl-3'}">${lbl}</td><td class="text-right py-1.5 font-mono" style="${color}">${fmt(val)}</td><td class="text-right py-1.5 text-slate-500 text-xs">${pctStr}</td></tr>`;
+  }).join('');
+}
+
+let chartCF, chartSens;
+function drawCharts(p, r){
+  // CF chart
+  const ctx1 = document.getElementById('chart_cf').getContext('2d');
+  const labels = r.factors.map((_, i) => 'An '+(i+1));
+  const cfH = r.factors.map(f => (r.ebitda * f - r.mandat * (f-1)) - r.annuite);
+  const cfF = r.yearlyCFFDL;
+  const exitBar = r.factors.map((_, i) => i === r.factors.length-1 ? r.netEquityExit : 0);
+  if(chartCF) chartCF.destroy();
+  chartCF = new Chart(ctx1, {
+    type:'bar',
+    data:{labels, datasets:[
+      {label:'CF hôtel après dette', data:cfH, backgroundColor:'#1B2A4E'},
+      {label:'CF FDL (avec mandat)', data:cfF, backgroundColor:'#B78A2E'},
+      {label:'Net equity sortie', data:exitBar, backgroundColor:'#047857'},
+    ]},
+    options:{plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}}},scales:{y:{ticks:{callback:v=>fmt(v)}}}}
+  });
+
+  // Sensitivity chart : valeur murs+fonds vs cap rate
+  const ctx2 = document.getElementById('chart_sens').getContext('2d');
+  const caps = [];
+  for(let c=Math.max(0.030,p.caprate-0.015); c<=p.caprate+0.015+1e-6; c+=0.0025) caps.push(c);
+  const datasets = [9, 11, 13].map((mEBE, idx) => {
     const colors = ['#B78A2E','#1B2A4E','#047857'];
     return {
-      label: 'TO '+(to*100).toFixed(0)+' %',
-      data: adrs.map(adr => Math.round(calc({...p, adr, to}).ebitda)),
+      label: 'Multiple EBE ' + mEBE + 'x',
+      data: caps.map(c => {
+        const valMurs = c>0 ? (r.loyer/c) * (1-p.fraisMS) : 0;
+        const valFonds = ((r.ca * p.multCA) + (r.ebePotentiel * mEBE)) / 2 * (1 - p.decote);
+        return Math.round(valMurs + valFonds);
+      }),
       borderColor: colors[idx],
       backgroundColor: colors[idx]+'22',
       tension: 0.25, fill:false, borderWidth:2
     };
   });
   if(chartSens) chartSens.destroy();
-  chartSens = new Chart(ctx, {
+  chartSens = new Chart(ctx2, {
     type:'line',
-    data:{labels:adrs.map(a=>a+' €'), datasets},
-    options:{
-      plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}}},
-      scales:{
-        y:{ticks:{callback:v=>fmt(v)},grid:{color:'#F3F4F6'}},
-        x:{grid:{display:false}}
-      }
-    }
+    data:{labels:caps.map(c=>pct(c)), datasets},
+    options:{plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}}},scales:{y:{ticks:{callback:v=>fmt(v)}}}}
   });
 }
 
-function drawCF(p, r){
-  const ctx = document.getElementById('chart_cf').getContext('2d');
-  const labels = r.factors.map((_, i) => 'An '+(i+1));
-  const cfH = r.factors.map((f) => (r.ebitda * f - r.mandat * (f-1)) - r.annuite);
-  const cfF = r.yearlyCFFDL;
-  // Add exit bar at the last position (separate dataset)
-  const exitBar = r.factors.map((_, i) => i === r.factors.length-1 ? r.netEquityExit : 0);
-  if(chartCF) chartCF.destroy();
-  chartCF = new Chart(ctx, {
-    type:'bar',
-    data:{
-      labels,
-      datasets:[
-        {label:'CF hôtel après dette', data:cfH, backgroundColor:'#1B2A4E'},
-        {label:'CF FDL consolidé', data:cfF, backgroundColor:'#B78A2E'},
-        {label:'Net equity sortie', data:exitBar, backgroundColor:'#047857'},
-      ]
-    },
-    options:{
-      plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}}},
-      scales:{
-        y:{ticks:{callback:v=>fmt(v)},grid:{color:'#F3F4F6'}},
-        x:{grid:{display:false}}
-      }
-    }
-  });
-}
-
-// ========= RENDER =========
-function render(p, r){
-  // Slider labels
-  document.getElementById('v_prix').textContent  = fmt(p.prix);
-  document.getElementById('v_capex').textContent = fmt(p.capex);
-  document.getElementById('v_chbres').textContent= p.chbres;
-  document.getElementById('v_adr').textContent   = p.adr + ' €';
-  document.getElementById('v_to').textContent    = pct(p.to);
-  document.getElementById('v_jours').textContent = p.jours + ' j';
-  document.getElementById('v_fb').textContent    = pct(p.fb);
-  document.getElementById('v_cd').textContent    = pct(p.cd);
-  document.getElementById('v_ms').textContent    = fmt(p.ms);
-  document.getElementById('v_cf').textContent    = fmt(p.cf);
-  document.getElementById('v_mgmt').textContent  = pct(p.mgmt);
-  document.getElementById('v_menage').textContent= pct(p.menage);
-  document.getElementById('v_ltv').textContent   = pct(p.ltv);
-  document.getElementById('v_taux').textContent  = pct(p.taux);
-  document.getElementById('v_duree').textContent = p.duree + ' ans';
-  document.getElementById('v_balloon').textContent = pct(p.balloon);
-  document.getElementById('v_mult').textContent  = p.mult.toFixed(1)+'x';
-  document.getElementById('v_cap').textContent   = pct(p.cap);
-  document.getElementById('v_horizon').textContent = Math.round(p.horizon)+' ans';
-
-  // KPIs (year 1 stabilized)
-  document.getElementById('k_ca').textContent     = fmt(r.ca);
-  document.getElementById('k_revpar').textContent = 'RevPAR '+fmt(r.revpar);
-  document.getElementById('k_ebitda').textContent = fmt(r.ebitda);
-  document.getElementById('k_margin').textContent = 'Marge '+pct(r.margin);
-  document.getElementById('k_dscr').textContent   = r.dscr.toFixed(2)+'x';
-  document.getElementById('k_dscr_sub').textContent = r.dscr>=1.2?'bancable':r.dscr>=1?'limite':'non-bancable';
-  document.getElementById('k_cf').textContent     = fmt(r.cfHotel);
-  document.getElementById('k_roi').textContent    = pct(r.roi);
-  document.getElementById('k_roe').textContent    = pct(r.roe);
-  document.getElementById('k_inv').textContent    = fmt(r.invest);
-  document.getElementById('k_prix_chbre').textContent = fmt(r.prixChbre)+' / chbre';
-  document.getElementById('k_equity').textContent = fmt(r.equity);
-  document.getElementById('k_coc').textContent    = 'CoC hôtel '+pct(r.cocHotel);
-  document.getElementById('k_mgmt').textContent   = fmt(r.mandat);
-  document.getElementById('k_mgmt_sub').textContent = pct(p.mgmt)+' du CA';
-  document.getElementById('k_cf_fdl').textContent = fmt(r.cfFDL);
-  document.getElementById('k_annuite').textContent = fmt(r.annuite);
-  const debtTypeLbl = debtType==='infine' ? 'In fine (intérêts seulement)' : (debtType==='bullet' ? 'Bullet ('+pct(p.balloon)+' in fine)' : 'Amortissable');
-  document.getElementById('k_annuite_sub').textContent = debtTypeLbl;
-  document.getElementById('k_mens').textContent   = fmt(r.mensual);
-  document.getElementById('k_mens_sub').textContent = 'Taux '+pct(p.taux)+' / '+p.duree+' ans';
-
-  // Exit KPIs
-  document.getElementById('k_exit').textContent = fmt(r.exitValue);
-  document.getElementById('k_exit_method').textContent = exitMethod==='mult' ? p.mult.toFixed(1)+'x EBITDA' : 'Cap rate '+pct(p.cap);
-  document.getElementById('k_dette_res').textContent = fmt(r.detteResiduelle);
-  document.getElementById('k_dette_res_sub').textContent = 'à année '+Math.round(p.horizon);
-  document.getElementById('k_net_exit').textContent = fmt(r.netEquityExit);
-  document.getElementById('k_cum_cf').textContent = fmt(r.cumCFFDL);
-  document.getElementById('k_cum_cf_sub').textContent = 'sur '+Math.round(p.horizon)+' ans';
-  document.getElementById('k_moic').textContent = r.moic.toFixed(2)+'x';
-  document.getElementById('k_moic_sub').textContent = 'sur equity de '+fmt(r.equity);
-  document.getElementById('k_irr').textContent = r.irr === null ? 'N/A' : pct(r.irr);
-  document.getElementById('k_irr_sub').textContent = 'sortie an '+Math.round(p.horizon);
-  document.getElementById('k_coc_total').textContent = pct(r.cocTotal);
-
-  // Exit verdict
-  const exitBadge = document.getElementById('exit_verdict');
-  if(r.irr === null || !isFinite(r.irr)){
-    exitBadge.className = 'badge badge-ko'; exitBadge.textContent = 'TRI non calculable';
-  } else if(r.irr >= 0.15){
-    exitBadge.className = 'badge badge-ok'; exitBadge.textContent = 'TRI > 15 % – attractif';
-  } else if(r.irr >= 0.08){
-    exitBadge.className = 'badge badge-warn'; exitBadge.textContent = 'TRI 8-15 % – correct';
-  } else if(r.irr >= 0){
-    exitBadge.className = 'badge badge-warn'; exitBadge.textContent = 'TRI faible';
-  } else {
-    exitBadge.className = 'badge badge-ko'; exitBadge.textContent = 'TRI négatif';
-  }
-
-  // P&L detail
-  const pnl = [
-    ['Chiffre d\'affaires hébergement', r.revHeberg, null, false],
-    ['Chiffre d\'affaires F&amp;B + autres', r.revFB, null, false],
-    ['<b>Total CA</b>', r.ca, r.ca, true],
-    ['Coûts directs', -r.coutsDirects, r.ca, false],
-    ['Ménage (externalisé)', -r.menage, r.ca, false],
-    ['Masse salariale', -r.masseSal, r.ca, false],
-    ['Charges fixes', -r.chargesFixes, r.ca, false],
-    ['Mandat de gestion FDL', -r.mandat, r.ca, false],
-    ['<b>EBITDA hôtel</b>', r.ebitda, r.ca, true],
-    ['Service de la dette (annuel)', -r.annuite, r.ca, false],
-    ['<b>Cash-flow hôtel après dette</b>', r.cfHotel, r.ca, true],
-    ['+ Revenu mandat (vers FDL)', r.mandat, r.ca, false],
-    ['<b>Cash-flow FDL consolidé</b>', r.cfFDL, r.ca, true],
-  ];
-  const body = document.getElementById('pnl_body');
-  body.innerHTML = pnl.map(([lbl,val,base,emph]) => {
-    const pctStr = base && base>0 ? pct(val/base) : '';
-    const color = val>=0 ? 'color:inherit' : 'color:#B91C1C';
-    const bg = emph ? 'background:#F2F4F8' : '';
-    return `<tr style="${bg}"><td class="py-1.5 ${emph?'':'pl-3'}">${lbl}</td><td class="text-right py-1.5 font-mono" style="${color}">${fmt(val)}</td><td class="text-right py-1.5 text-slate-500 text-xs">${pctStr}</td></tr>`;
-  }).join('');
-
-  // Debt table
-  const typeLbl = debtType === 'infine' ? 'In fine' : (debtType==='bullet' ? 'Bullet '+pct(p.balloon) : 'Amortissable');
-  const dt = [
-    ['Prix acquisition (FAI)', fmt(p.prix)],
-    ['Frais de notaire (7%)', fmt(p.prix*0.07)],
-    ['Travaux / CAPEX', fmt(p.capex)],
-    ['<b>Investissement total</b>', '<b>'+fmt(r.invest)+'</b>'],
-    ['Structure', '<b>'+typeLbl+'</b>'],
-    ['LTV', pct(p.ltv)],
-    ['Montant emprunté', fmt(r.loan)],
-    ['Equity requis', fmt(r.equity)],
-    ['Taux / Durée', pct(p.taux)+' / '+p.duree+' ans'],
-    ['Mensualité', fmt(r.mensual)],
-    ['<b>Annuité</b>', '<b>'+fmt(r.annuite)+'</b>'],
-  ];
-  if(debtType === 'infine'){
-    dt.push(['Capital à rembourser in fine', '<b style="color:#B91C1C">'+fmt(r.loan)+'</b>']);
-  } else if(debtType === 'bullet'){
-    dt.push(['Bullet à rembourser à terme', '<b style="color:#B91C1C">'+fmt(r.loan*p.balloon)+'</b>']);
-  }
-  dt.push(['<b>Dette résiduelle à année '+Math.round(p.horizon)+'</b>', '<b>'+fmt(r.detteResiduelle)+'</b>']);
-  document.getElementById('debt_body').innerHTML = dt.map(([k,v])=>`<tr class="border-b border-slate-100"><td class="py-1.5 text-slate-600">${k}</td><td class="text-right py-1.5 font-mono">${v}</td></tr>`).join('');
-
-  // Verdict badge
-  const badge = document.getElementById('verdict');
-  if(r.dscr >= 1.25 && r.cfFDL > 0){
-    badge.className = 'badge badge-ok'; badge.textContent = 'Viable – à négocier';
-  } else if(r.dscr >= 1.0 && r.cfFDL > 0){
-    badge.className = 'badge badge-warn'; badge.textContent = 'Limite – attention marge';
-  } else if(r.dscr >= 0.9){
-    badge.className = 'badge badge-warn'; badge.textContent = 'Sous la ligne d\'eau';
-  } else {
-    badge.className = 'badge badge-ko'; badge.textContent = 'Non-bancable';
-  }
-}
-
-// ========= MAIN =========
 function compute(){
   const p = {};
   ids.forEach(id => p[id] = parseFloat(inputs[id].value));
   const r = calc(p);
   render(p, r);
-  drawSens(p);
-  drawCF(p, r);
+  drawCharts(p, r);
 }
 
 ids.forEach(id => inputs[id].addEventListener('input', compute));
-
-document.getElementById('today').textContent = new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
-
 compute();
 </script>
 </body>
