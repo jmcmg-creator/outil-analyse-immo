@@ -31,16 +31,12 @@
   .btn-primary:hover{background:#0F1A38;}
   .slider-val{font-family:ui-monospace,monospace;font-weight:700;color:var(--navy);}
   .seg{display:inline-flex;border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;background:white;}
-  .seg button{padding:6px 14px;font-size:12px;font-weight:600;color:#6B7280;background:transparent;border:none;cursor:pointer;}
+  .seg button{padding:6px 12px;font-size:12px;font-weight:600;color:#6B7280;background:transparent;border:none;cursor:pointer;}
   .seg button.active{background:var(--navy);color:white;}
-
-  /* ============= PRINT STYLES ============= */
-  @page {
-    size: A4 portrait;
-    margin: 12mm 10mm;
-  }
+  .hidden-row{display:none;}
+  @page { size: A4 portrait; margin: 12mm 10mm; }
   @media print {
-    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     body { background: white !important; padding: 0 !important; margin: 0 !important; font-size: 10pt; }
     .no-print { display: none !important; }
     .max-w-7xl { max-width: 100% !important; }
@@ -63,7 +59,6 @@
     table { font-size: 9pt !important; }
     .page-break { page-break-before: always; break-before: page; }
     .badge { font-size: 9pt !important; }
-    /* Keep two-column layout for params/results on print */
     .print-two-col { display: grid !important; grid-template-columns: 1fr 1.6fr !important; gap: 4mm !important; }
     .print-params .p-5 { padding: 8px !important; }
     .print-params > div { margin-bottom: 3mm; }
@@ -82,9 +77,7 @@
       <h1 class="text-3xl font-bold" style="color:var(--navy)">Simulateur – Hôtel Alexandre III</h1>
       <p class="text-sm text-slate-500 mt-1">15 Bd Alexandre III, Cannes &middot; 11 chambres existantes &middot; Scénario exploitation hôtelière avec mandat de gestion FDL</p>
     </div>
-    <button class="btn btn-primary no-print" onclick="window.print()">
-      Imprimer / Exporter PDF
-    </button>
+    <button class="btn btn-primary no-print" onclick="window.print()">Imprimer / Exporter PDF</button>
   </div>
 
   <!-- PRESETS -->
@@ -196,9 +189,42 @@
           <div class="text-sm font-semibold mb-2 slider-row-label">Structure de la dette</div>
           <div class="seg">
             <button id="b_amort" class="active" onclick="setDebtType('amort')">Amortissable</button>
+            <button id="b_bullet" onclick="setDebtType('bullet')">Bullet</button>
             <button id="b_infine" onclick="setDebtType('infine')">In fine</button>
           </div>
-          <p class="text-xs text-slate-500 mt-2 italic no-print" id="debt_help">Amortissable : capital + intérêts sur la durée. In fine : intérêts seulement pendant la durée, capital in fine.</p>
+          <p class="text-xs text-slate-500 mt-2 italic no-print" id="debt_help">Amortissable : capital + intérêts sur la durée. Bullet : une partie amortie, une partie remboursée in fine. In fine : intérêts seulement, capital remboursé au terme.</p>
+        </div>
+
+        <div id="balloon_row" class="hidden-row">
+          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Part bullet (% du capital remboursée in fine)</label><span class="slider-val" id="v_balloon"></span></div>
+          <input type="range" id="s_balloon" min="0.10" max="0.80" step="0.05" value="0.30" />
+          <p class="text-xs text-slate-500 mt-1 italic no-print">Le reste s'amortit normalement sur la durée.</p>
+        </div>
+
+        <hr class="border-slate-200" />
+
+        <div>
+          <div class="text-sm font-semibold mb-2 slider-row-label">Méthode de valorisation à la sortie</div>
+          <div class="seg">
+            <button id="m_mult" class="active" onclick="setExitMethod('mult')">Multiple EBITDA</button>
+            <button id="m_cap" onclick="setExitMethod('cap')">Cap rate</button>
+          </div>
+        </div>
+
+        <div id="mult_row">
+          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Multiple EBITDA de sortie</label><span class="slider-val" id="v_mult"></span></div>
+          <input type="range" id="s_mult" min="6" max="15" step="0.5" value="10" />
+        </div>
+
+        <div id="cap_row" class="hidden-row">
+          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Cap rate de sortie</label><span class="slider-val" id="v_cap"></span></div>
+          <input type="range" id="s_cap" min="0.04" max="0.10" step="0.0025" value="0.06" />
+          <p class="text-xs text-slate-500 mt-1 italic no-print">Valeur de sortie = EBITDA / Cap rate</p>
+        </div>
+
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Horizon de sortie (ans)</label><span class="slider-val" id="v_horizon"></span></div>
+          <input type="range" id="s_horizon" min="3" max="15" step="1" value="5" />
         </div>
 
       </div>
@@ -221,10 +247,37 @@
             <div class="kpi"><div class="kpi-label">Cash-flow après dette</div><div class="kpi-value" id="k_cf"></div><div class="kpi-sub">hôtel seul</div></div>
           </div>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
-            <div class="kpi" style="background:#FEF7E6;border-color:#F4D488"><div class="kpi-label" style="color:var(--gold)">Revenu mandat FDL</div><div class="kpi-value" id="k_mgmt"></div><div class="kpi-sub" id="k_mgmt_sub">10% CA par défaut</div></div>
-            <div class="kpi" style="background:#FEF7E6;border-color:#F4D488"><div class="kpi-label" style="color:var(--gold)">CF total FDL (hôtel + mandat)</div><div class="kpi-value" id="k_cf_fdl"></div><div class="kpi-sub">consolidé</div></div>
+            <div class="kpi" style="background:#ECFDF5;border-color:#86EFAC"><div class="kpi-label" style="color:var(--green)">ROI brut</div><div class="kpi-value" id="k_roi"></div><div class="kpi-sub">EBITDA / Investissement</div></div>
+            <div class="kpi" style="background:#ECFDF5;border-color:#86EFAC"><div class="kpi-label" style="color:var(--green)">ROE leveraged</div><div class="kpi-value" id="k_roe"></div><div class="kpi-sub">CF FDL / Equity</div></div>
             <div class="kpi"><div class="kpi-label">Investissement total</div><div class="kpi-value" id="k_inv"></div><div class="kpi-sub" id="k_prix_chbre"></div></div>
             <div class="kpi"><div class="kpi-label">Equity requis</div><div class="kpi-value" id="k_equity"></div><div class="kpi-sub" id="k_coc"></div></div>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+            <div class="kpi" style="background:#FEF7E6;border-color:#F4D488"><div class="kpi-label" style="color:var(--gold)">Revenu mandat FDL</div><div class="kpi-value" id="k_mgmt"></div><div class="kpi-sub" id="k_mgmt_sub">10% CA par défaut</div></div>
+            <div class="kpi" style="background:#FEF7E6;border-color:#F4D488"><div class="kpi-label" style="color:var(--gold)">CF total FDL (hôtel + mandat)</div><div class="kpi-value" id="k_cf_fdl"></div><div class="kpi-sub">consolidé</div></div>
+            <div class="kpi"><div class="kpi-label">Service de la dette</div><div class="kpi-value" id="k_annuite"></div><div class="kpi-sub" id="k_annuite_sub">annuel</div></div>
+            <div class="kpi"><div class="kpi-label">Mensualité</div><div class="kpi-value" id="k_mens"></div><div class="kpi-sub" id="k_mens_sub"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXIT / FINAL CFs -->
+      <div class="card">
+        <div class="card-header flex justify-between items-center">
+          <span>Sortie &amp; cash-flows finaux</span>
+          <span id="exit_verdict" class="badge badge-ok"></span>
+        </div>
+        <div class="p-5">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="kpi"><div class="kpi-label">Valeur de sortie</div><div class="kpi-value" id="k_exit"></div><div class="kpi-sub" id="k_exit_method"></div></div>
+            <div class="kpi"><div class="kpi-label">Dette résiduelle</div><div class="kpi-value" id="k_dette_res"></div><div class="kpi-sub" id="k_dette_res_sub"></div></div>
+            <div class="kpi"><div class="kpi-label">Net equity sortie</div><div class="kpi-value" id="k_net_exit"></div><div class="kpi-sub">après remboursement</div></div>
+            <div class="kpi"><div class="kpi-label">Cumul CF FDL</div><div class="kpi-value" id="k_cum_cf"></div><div class="kpi-sub" id="k_cum_cf_sub"></div></div>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
+            <div class="kpi" style="background:#ECFDF5;border-color:#86EFAC"><div class="kpi-label" style="color:var(--green)">Multiple equity (MOIC)</div><div class="kpi-value" id="k_moic"></div><div class="kpi-sub" id="k_moic_sub"></div></div>
+            <div class="kpi" style="background:#ECFDF5;border-color:#86EFAC"><div class="kpi-label" style="color:var(--green)">TRI equity (annualisé)</div><div class="kpi-value" id="k_irr"></div><div class="kpi-sub" id="k_irr_sub"></div></div>
+            <div class="kpi"><div class="kpi-label">Cash-on-cash sortie</div><div class="kpi-value" id="k_coc_total"></div><div class="kpi-sub">(equity sortie + cumul CF) / equity</div></div>
           </div>
         </div>
       </div>
@@ -264,7 +317,7 @@
 
       <!-- CHART CASH-FLOW -->
       <div class="card">
-        <div class="card-header">Timeline cash-flow 5 ans (avec ramp-up)</div>
+        <div class="card-header">Timeline cash-flow (avec ramp-up &amp; sortie)</div>
         <div class="p-5"><canvas id="chart_cf" height="140"></canvas></div>
       </div>
 
@@ -286,35 +339,105 @@ const fmt = n => new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',
 const pct = n => (n*100).toFixed(1)+' %';
 
 // ========= STATE =========
-const ids = ['prix','capex','chbres','adr','to','jours','fb','cd','ms','cf','mgmt','menage','ltv','taux','duree'];
+const ids = ['prix','capex','chbres','adr','to','jours','fb','cd','ms','cf','mgmt','menage','ltv','taux','duree','balloon','mult','cap','horizon'];
 const inputs = {};
 ids.forEach(id => inputs[id] = document.getElementById('s_'+id));
 
-let debtType = 'amort'; // 'amort' or 'infine'
+let debtType = 'amort'; // 'amort', 'bullet', or 'infine'
 function setDebtType(t){
   debtType = t;
   document.getElementById('b_amort').classList.toggle('active', t==='amort');
+  document.getElementById('b_bullet').classList.toggle('active', t==='bullet');
   document.getElementById('b_infine').classList.toggle('active', t==='infine');
+  document.getElementById('balloon_row').className = (t==='bullet') ? '' : 'hidden-row';
+  compute();
+}
+
+let exitMethod = 'mult'; // 'mult' or 'cap'
+function setExitMethod(m){
+  exitMethod = m;
+  document.getElementById('m_mult').classList.toggle('active', m==='mult');
+  document.getElementById('m_cap').classList.toggle('active', m==='cap');
+  document.getElementById('mult_row').className = (m==='mult') ? '' : 'hidden-row';
+  document.getElementById('cap_row').className = (m==='cap') ? '' : 'hidden-row';
   compute();
 }
 
 // ========= PRESETS =========
 function applyPreset(name){
   const P = {
-    buyout:{prix:2500000,capex:0,chbres:11,adr:140,to:0.72,jours:240,fb:0.08,cd:0.20,ms:140000,cf:60000,mgmt:0.10,menage:0.10,ltv:0.75,taux:0.045,duree:20},
-    reno  :{prix:2750000,capex:1500000,chbres:11,adr:280,to:0.72,jours:320,fb:0.18,cd:0.22,ms:280000,cf:95000,mgmt:0.10,menage:0.10,ltv:0.75,taux:0.045,duree:20},
-    ext   :{prix:3000000,capex:3000000,chbres:15,adr:310,to:0.72,jours:340,fb:0.25,cd:0.24,ms:360000,cf:125000,mgmt:0.10,menage:0.10,ltv:0.75,taux:0.045,duree:25},
-    stress:{prix:2750000,capex:1500000,chbres:11,adr:210,to:0.60,jours:280,fb:0.15,cd:0.25,ms:280000,cf:100000,mgmt:0.10,menage:0.10,ltv:0.75,taux:0.055,duree:20},
+    buyout:{prix:2500000,capex:0,chbres:11,adr:140,to:0.72,jours:240,fb:0.08,cd:0.20,ms:140000,cf:60000,mgmt:0.10,menage:0.10,ltv:0.75,taux:0.045,duree:20,balloon:0.30,mult:9,cap:0.07,horizon:5},
+    reno  :{prix:2750000,capex:1500000,chbres:11,adr:280,to:0.72,jours:320,fb:0.18,cd:0.22,ms:280000,cf:95000,mgmt:0.10,menage:0.10,ltv:0.75,taux:0.045,duree:20,balloon:0.30,mult:10,cap:0.06,horizon:5},
+    ext   :{prix:3000000,capex:3000000,chbres:15,adr:310,to:0.72,jours:340,fb:0.25,cd:0.24,ms:360000,cf:125000,mgmt:0.10,menage:0.10,ltv:0.75,taux:0.045,duree:25,balloon:0.30,mult:11,cap:0.055,horizon:7},
+    stress:{prix:2750000,capex:1500000,chbres:11,adr:210,to:0.60,jours:280,fb:0.15,cd:0.25,ms:280000,cf:100000,mgmt:0.10,menage:0.10,ltv:0.75,taux:0.055,duree:20,balloon:0.30,mult:8,cap:0.075,horizon:5},
   };
   const p = P[name]; if(!p) return;
   ids.forEach(id => inputs[id].value = p[id]);
   compute();
 }
 
+// ========= IRR (Newton-Raphson) =========
+function irr(cashflows, guess=0.10){
+  const npv = (r) => cashflows.reduce((acc, cf, t) => acc + cf / Math.pow(1+r, t), 0);
+  const dnpv = (r) => cashflows.reduce((acc, cf, t) => acc - t * cf / Math.pow(1+r, t+1), 0);
+  let r = guess;
+  for(let i=0; i<100; i++){
+    const v = npv(r);
+    const d = dnpv(r);
+    if(Math.abs(d) < 1e-12) break;
+    const r2 = r - v/d;
+    if(!isFinite(r2)) return null;
+    if(Math.abs(r2 - r) < 1e-7) return r2;
+    r = r2;
+    if(r < -0.99) r = -0.99;
+  }
+  return r;
+}
+
+// ========= DEBT =========
+function debtSchedule(p){
+  const acquisition = p.prix * 1.07;
+  const invest = acquisition + p.capex;
+  const loan = invest * p.ltv;
+  const equity = invest - loan;
+  let mensual, annuite, principalEndOfYear;
+  const i = p.taux / 12;
+  const n = p.duree * 12;
+
+  if(debtType === 'infine'){
+    annuite = loan * p.taux;
+    mensual = annuite / 12;
+    principalEndOfYear = (year) => year >= p.duree ? 0 : loan; // capital remboursé in fine
+  } else if(debtType === 'bullet'){
+    const balloonAmount = loan * p.balloon;
+    const amortAmount = loan - balloonAmount;
+    const mortgage = amortAmount * i / (1 - Math.pow(1+i, -n));
+    const balloonInterest = balloonAmount * p.taux;
+    mensual = mortgage + balloonInterest / 12;
+    annuite = mensual * 12;
+    principalEndOfYear = (year) => {
+      if(year >= p.duree) return 0;
+      // principal restant amorti = amortAmount - principal payé sur 'year' années
+      // formule: solde restant après k mois = loan_init * (1 - ((1+i)^k - 1) / ((1+i)^n - 1))
+      const k = Math.min(year * 12, n);
+      const remainingAmort = amortAmount * (Math.pow(1+i, n) - Math.pow(1+i, k)) / (Math.pow(1+i, n) - 1);
+      return remainingAmort + balloonAmount;
+    };
+  } else {
+    mensual = loan * i / (1 - Math.pow(1+i, -n));
+    annuite = mensual * 12;
+    principalEndOfYear = (year) => {
+      if(year >= p.duree) return 0;
+      const k = Math.min(year * 12, n);
+      return loan * (Math.pow(1+i, n) - Math.pow(1+i, k)) / (Math.pow(1+i, n) - 1);
+    };
+  }
+  return { invest, acquisition, loan, equity, mensual, annuite, principalEndOfYear };
+}
+
 // ========= CORE CALC =========
 function calc(p){
-  const acquisition = p.prix * 1.07;              // 7% frais notaire estimés
-  const invest = acquisition + p.capex;
+  const debt = debtSchedule(p);
   const nights = p.chbres * p.jours * p.to;
   const revHeberg = nights * p.adr;
   const revFB = revHeberg * p.fb;
@@ -324,40 +447,62 @@ function calc(p){
   const menage = ca * p.menage;
   const masseSal = Number(p.ms);
   const chargesFixes = Number(p.cf);
-  const mandat = ca * p.mgmt;                     // cost for hotel
+  const mandat = ca * p.mgmt;
 
   const ebitda = ca - coutsDirects - menage - masseSal - chargesFixes - mandat;
   const margin = ca>0 ? ebitda/ca : 0;
   const revpar = p.to * p.adr;
   const prixChbre = p.prix / p.chbres;
 
-  // Dette
-  const loan = invest * p.ltv;
-  const equity = invest - loan;
-  let mensual, annuite;
-  if(debtType === 'infine'){
-    // Intérêts seulement pendant la durée (capital remboursé à terme)
-    const interet = loan * p.taux;
-    annuite = interet;
-    mensual = interet / 12;
-  } else {
-    const i = p.taux / 12;
-    const n = p.duree * 12;
-    mensual = loan * i / (1 - Math.pow(1+i, -n));
-    annuite = mensual * 12;
-  }
-  const dscr = annuite>0 ? ebitda / annuite : 0;
-  const cfHotel = ebitda - annuite;
+  const dscr = debt.annuite>0 ? ebitda / debt.annuite : 0;
+  const cfHotel = ebitda - debt.annuite;
   const cfFDL = cfHotel + mandat;
-  const cocHotel = equity>0 ? cfHotel / equity : 0;
-  const cocFDL = equity>0 ? cfFDL / equity : 0;
+  const cocHotel = debt.equity>0 ? cfHotel / debt.equity : 0;
+  const cocFDL = debt.equity>0 ? cfFDL / debt.equity : 0;
+
+  const roi = debt.invest>0 ? ebitda / debt.invest : 0;
+  const roe = debt.equity>0 ? cfFDL / debt.equity : 0;
+
+  // ===== EXIT VALUATION =====
+  const horizon = Math.round(p.horizon);
+  const exitValue = exitMethod === 'mult' ? ebitda * p.mult : (p.cap>0 ? ebitda / p.cap : 0);
+  const detteResiduelle = debt.principalEndOfYear(horizon);
+  const netEquityExit = exitValue - detteResiduelle;
+
+  // Cumul CF over horizon (with ramp-up factors)
+  const factors = [];
+  for(let y=1; y<=horizon; y++){
+    let f;
+    if(y===1) f = 0.30;
+    else if(y===2) f = 0.80;
+    else if(y===3) f = 1.00;
+    else if(y===4) f = 1.02;
+    else f = 1.00 + 0.02 * (y-3);
+    factors.push(f);
+  }
+  const yearlyCFFDL = factors.map(f => (ebitda * f - mandat * (f-1)) - debt.annuite + mandat * f);
+  const cumCFFDL = yearlyCFFDL.reduce((a,b)=>a+b, 0);
+
+  // IRR computation
+  const cashflows = [-debt.equity];
+  factors.forEach((f, idx) => {
+    let cf = yearlyCFFDL[idx];
+    if(idx === factors.length - 1) cf += netEquityExit;
+    cashflows.push(cf);
+  });
+  const irrVal = irr(cashflows);
+  const moic = debt.equity>0 ? (cumCFFDL + netEquityExit) / debt.equity : 0;
+  const cocTotal = debt.equity>0 ? (cumCFFDL + netEquityExit) / debt.equity : 0;
 
   return {
-    acquisition, invest, nights, revHeberg, revFB, ca,
+    ...debt,
+    nights, revHeberg, revFB, ca,
     coutsDirects, menage, masseSal, chargesFixes, mandat,
     ebitda, margin, revpar, prixChbre,
-    loan, equity, mensual, annuite, dscr,
-    cfHotel, cfFDL, cocHotel, cocFDL
+    dscr, cfHotel, cfFDL, cocHotel, cocFDL,
+    roi, roe,
+    horizon, exitValue, detteResiduelle, netEquityExit,
+    yearlyCFFDL, cumCFFDL, irr: irrVal, moic, cocTotal, factors
   };
 }
 
@@ -372,10 +517,7 @@ function drawSens(p){
     const colors = ['#B78A2E','#1B2A4E','#047857'];
     return {
       label: 'TO '+(to*100).toFixed(0)+' %',
-      data: adrs.map(adr => {
-        const sim = calc({...p, adr, to});
-        return Math.round(sim.ebitda);
-      }),
+      data: adrs.map(adr => Math.round(calc({...p, adr, to}).ebitda)),
       borderColor: colors[idx],
       backgroundColor: colors[idx]+'22',
       tension: 0.25, fill:false, borderWidth:2
@@ -395,21 +537,22 @@ function drawSens(p){
   });
 }
 
-function drawCF(p){
+function drawCF(p, r){
   const ctx = document.getElementById('chart_cf').getContext('2d');
-  const stab = calc(p);
-  const factors = [0.30, 0.80, 1.00, 1.02, 1.04];
-  const ebs = factors.map(f => stab.ebitda * f - stab.mandat * (f-1));
-  const cfH = ebs.map(e => e - stab.annuite);
-  const cfF = cfH.map((c,i) => c + stab.mandat * factors[i]);
+  const labels = r.factors.map((_, i) => 'An '+(i+1));
+  const cfH = r.factors.map((f) => (r.ebitda * f - r.mandat * (f-1)) - r.annuite);
+  const cfF = r.yearlyCFFDL;
+  // Add exit bar at the last position (separate dataset)
+  const exitBar = r.factors.map((_, i) => i === r.factors.length-1 ? r.netEquityExit : 0);
   if(chartCF) chartCF.destroy();
   chartCF = new Chart(ctx, {
     type:'bar',
     data:{
-      labels:['An 1','An 2','An 3','An 4','An 5'],
+      labels,
       datasets:[
         {label:'CF hôtel après dette', data:cfH, backgroundColor:'#1B2A4E'},
-        {label:'CF FDL consolidé (hôtel + mandat)', data:cfF, backgroundColor:'#B78A2E'},
+        {label:'CF FDL consolidé', data:cfF, backgroundColor:'#B78A2E'},
+        {label:'Net equity sortie', data:exitBar, backgroundColor:'#047857'},
       ]
     },
     options:{
@@ -440,8 +583,12 @@ function render(p, r){
   document.getElementById('v_ltv').textContent   = pct(p.ltv);
   document.getElementById('v_taux').textContent  = pct(p.taux);
   document.getElementById('v_duree').textContent = p.duree + ' ans';
+  document.getElementById('v_balloon').textContent = pct(p.balloon);
+  document.getElementById('v_mult').textContent  = p.mult.toFixed(1)+'x';
+  document.getElementById('v_cap').textContent   = pct(p.cap);
+  document.getElementById('v_horizon').textContent = Math.round(p.horizon)+' ans';
 
-  // KPIs
+  // KPIs (year 1 stabilized)
   document.getElementById('k_ca').textContent     = fmt(r.ca);
   document.getElementById('k_revpar').textContent = 'RevPAR '+fmt(r.revpar);
   document.getElementById('k_ebitda').textContent = fmt(r.ebitda);
@@ -449,13 +596,48 @@ function render(p, r){
   document.getElementById('k_dscr').textContent   = r.dscr.toFixed(2)+'x';
   document.getElementById('k_dscr_sub').textContent = r.dscr>=1.2?'bancable':r.dscr>=1?'limite':'non-bancable';
   document.getElementById('k_cf').textContent     = fmt(r.cfHotel);
-  document.getElementById('k_mgmt').textContent   = fmt(r.mandat);
-  document.getElementById('k_mgmt_sub').textContent = pct(p.mgmt)+' du CA';
-  document.getElementById('k_cf_fdl').textContent = fmt(r.cfFDL);
+  document.getElementById('k_roi').textContent    = pct(r.roi);
+  document.getElementById('k_roe').textContent    = pct(r.roe);
   document.getElementById('k_inv').textContent    = fmt(r.invest);
   document.getElementById('k_prix_chbre').textContent = fmt(r.prixChbre)+' / chbre';
   document.getElementById('k_equity').textContent = fmt(r.equity);
-  document.getElementById('k_coc').textContent    = 'CoC hôtel '+pct(r.cocHotel)+' | FDL '+pct(r.cocFDL);
+  document.getElementById('k_coc').textContent    = 'CoC hôtel '+pct(r.cocHotel);
+  document.getElementById('k_mgmt').textContent   = fmt(r.mandat);
+  document.getElementById('k_mgmt_sub').textContent = pct(p.mgmt)+' du CA';
+  document.getElementById('k_cf_fdl').textContent = fmt(r.cfFDL);
+  document.getElementById('k_annuite').textContent = fmt(r.annuite);
+  const debtTypeLbl = debtType==='infine' ? 'In fine (intérêts seulement)' : (debtType==='bullet' ? 'Bullet ('+pct(p.balloon)+' in fine)' : 'Amortissable');
+  document.getElementById('k_annuite_sub').textContent = debtTypeLbl;
+  document.getElementById('k_mens').textContent   = fmt(r.mensual);
+  document.getElementById('k_mens_sub').textContent = 'Taux '+pct(p.taux)+' / '+p.duree+' ans';
+
+  // Exit KPIs
+  document.getElementById('k_exit').textContent = fmt(r.exitValue);
+  document.getElementById('k_exit_method').textContent = exitMethod==='mult' ? p.mult.toFixed(1)+'x EBITDA' : 'Cap rate '+pct(p.cap);
+  document.getElementById('k_dette_res').textContent = fmt(r.detteResiduelle);
+  document.getElementById('k_dette_res_sub').textContent = 'à année '+Math.round(p.horizon);
+  document.getElementById('k_net_exit').textContent = fmt(r.netEquityExit);
+  document.getElementById('k_cum_cf').textContent = fmt(r.cumCFFDL);
+  document.getElementById('k_cum_cf_sub').textContent = 'sur '+Math.round(p.horizon)+' ans';
+  document.getElementById('k_moic').textContent = r.moic.toFixed(2)+'x';
+  document.getElementById('k_moic_sub').textContent = 'sur equity de '+fmt(r.equity);
+  document.getElementById('k_irr').textContent = r.irr === null ? 'N/A' : pct(r.irr);
+  document.getElementById('k_irr_sub').textContent = 'sortie an '+Math.round(p.horizon);
+  document.getElementById('k_coc_total').textContent = pct(r.cocTotal);
+
+  // Exit verdict
+  const exitBadge = document.getElementById('exit_verdict');
+  if(r.irr === null || !isFinite(r.irr)){
+    exitBadge.className = 'badge badge-ko'; exitBadge.textContent = 'TRI non calculable';
+  } else if(r.irr >= 0.15){
+    exitBadge.className = 'badge badge-ok'; exitBadge.textContent = 'TRI > 15 % – attractif';
+  } else if(r.irr >= 0.08){
+    exitBadge.className = 'badge badge-warn'; exitBadge.textContent = 'TRI 8-15 % – correct';
+  } else if(r.irr >= 0){
+    exitBadge.className = 'badge badge-warn'; exitBadge.textContent = 'TRI faible';
+  } else {
+    exitBadge.className = 'badge badge-ko'; exitBadge.textContent = 'TRI négatif';
+  }
 
   // P&L detail
   const pnl = [
@@ -482,7 +664,7 @@ function render(p, r){
   }).join('');
 
   // Debt table
-  const typeLbl = debtType === 'infine' ? 'In fine' : 'Amortissable';
+  const typeLbl = debtType === 'infine' ? 'In fine' : (debtType==='bullet' ? 'Bullet '+pct(p.balloon) : 'Amortissable');
   const dt = [
     ['Prix acquisition (FAI)', fmt(p.prix)],
     ['Frais de notaire (7%)', fmt(p.prix*0.07)],
@@ -493,12 +675,15 @@ function render(p, r){
     ['Montant emprunté', fmt(r.loan)],
     ['Equity requis', fmt(r.equity)],
     ['Taux / Durée', pct(p.taux)+' / '+p.duree+' ans'],
-    [debtType==='infine' ? 'Intérêts mensuels' : 'Mensualité', fmt(r.mensual)],
-    ['<b>'+(debtType==='infine'?'Intérêts annuels (annuité)':'Annuité')+'</b>', '<b>'+fmt(r.annuite)+'</b>'],
+    ['Mensualité', fmt(r.mensual)],
+    ['<b>Annuité</b>', '<b>'+fmt(r.annuite)+'</b>'],
   ];
   if(debtType === 'infine'){
     dt.push(['Capital à rembourser in fine', '<b style="color:#B91C1C">'+fmt(r.loan)+'</b>']);
+  } else if(debtType === 'bullet'){
+    dt.push(['Bullet à rembourser à terme', '<b style="color:#B91C1C">'+fmt(r.loan*p.balloon)+'</b>']);
   }
+  dt.push(['<b>Dette résiduelle à année '+Math.round(p.horizon)+'</b>', '<b>'+fmt(r.detteResiduelle)+'</b>']);
   document.getElementById('debt_body').innerHTML = dt.map(([k,v])=>`<tr class="border-b border-slate-100"><td class="py-1.5 text-slate-600">${k}</td><td class="text-right py-1.5 font-mono">${v}</td></tr>`).join('');
 
   // Verdict badge
@@ -521,12 +706,11 @@ function compute(){
   const r = calc(p);
   render(p, r);
   drawSens(p);
-  drawCF(p);
+  drawCF(p, r);
 }
 
 ids.forEach(id => inputs[id].addEventListener('input', compute));
 
-// Set today's date in footer
 document.getElementById('today').textContent = new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
 
 compute();
