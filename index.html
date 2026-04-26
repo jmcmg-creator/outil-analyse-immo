@@ -1,16 +1,535 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Simulateur Hotel Alexandre III - Cannes</title>
-<meta http-equiv="refresh" content="0; url=https://files.catbox.moe/39t213.html">
-<style>body{font-family:system-ui,sans-serif;text-align:center;padding:40px;color:#1B2A4E}a{color:#B78A2E}</style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Simulateur – Hôtel Alexandre III Cannes</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --navy:#1B2A4E; --gold:#B78A2E; --light:#F2F4F8;
+    --green:#047857; --red:#B91C1C; --amber:#B45309;
+  }
+  body{background:linear-gradient(135deg,#F8F9FC 0%,#EEF1F6 100%);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
+  .card{background:white;border:1px solid #E5E7EB;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+  .card-header{background:var(--navy);color:white;padding:14px 20px;border-radius:14px 14px 0 0;font-weight:700;letter-spacing:.02em;}
+  input[type="range"]{-webkit-appearance:none;width:100%;height:6px;background:#E5E7EB;border-radius:3px;outline:none;}
+  input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:var(--navy);border-radius:50%;cursor:pointer;border:3px solid white;box-shadow:0 0 0 1px var(--navy);}
+  input[type="range"]::-moz-range-thumb{width:20px;height:20px;background:var(--navy);border-radius:50%;cursor:pointer;border:3px solid white;box-shadow:0 0 0 1px var(--navy);}
+  .kpi{padding:14px 18px;border-radius:10px;background:var(--light);border:1px solid #E5E7EB;}
+  .kpi-label{font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:.05em;font-weight:600;}
+  .kpi-value{font-size:22px;font-weight:700;color:var(--navy);margin-top:4px;}
+  .kpi-sub{font-size:11px;color:#6B7280;margin-top:2px;}
+  .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+  .badge-ok{background:#D1FAE5;color:#065F46;}
+  .badge-warn{background:#FEF3C7;color:#92400E;}
+  .badge-ko{background:#FEE2E2;color:#991B1B;}
+  .btn{padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;border:1px solid #E5E7EB;background:white;cursor:pointer;transition:all .15s;}
+  .btn:hover{background:var(--navy);color:white;border-color:var(--navy);}
+  .btn-primary{background:var(--navy);color:white;border-color:var(--navy);}
+  .btn-primary:hover{background:#0F1A38;}
+  .slider-val{font-family:ui-monospace,monospace;font-weight:700;color:var(--navy);}
+  .seg{display:inline-flex;border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;background:white;}
+  .seg button{padding:6px 14px;font-size:12px;font-weight:600;color:#6B7280;background:transparent;border:none;cursor:pointer;}
+  .seg button.active{background:var(--navy);color:white;}
+
+  /* ============= PRINT STYLES ============= */
+  @page {
+    size: A4 portrait;
+    margin: 12mm 10mm;
+  }
+  @media print {
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+    body { background: white !important; padding: 0 !important; margin: 0 !important; font-size: 10pt; }
+    .no-print { display: none !important; }
+    .max-w-7xl { max-width: 100% !important; }
+    .card { box-shadow: none !important; border: 1px solid #D1D5DB !important; page-break-inside: avoid; break-inside: avoid; margin-bottom: 8mm; }
+    .card-header { background: var(--navy) !important; color: white !important; padding: 8px 14px !important; font-size: 11pt; }
+    .grid { display: grid !important; gap: 4mm !important; }
+    .lg\\:grid-cols-3 { grid-template-columns: 1fr !important; }
+    .lg\\:col-span-1, .lg\\:col-span-2 { grid-column: span 1 / span 1 !important; }
+    .md\\:grid-cols-4 { grid-template-columns: repeat(4, 1fr) !important; }
+    .md\\:grid-cols-2 { grid-template-columns: repeat(2, 1fr) !important; }
+    .kpi { padding: 8px 10px !important; }
+    .kpi-value { font-size: 14pt !important; }
+    .kpi-label { font-size: 8pt !important; }
+    .kpi-sub { font-size: 8pt !important; }
+    input[type="range"] { display: none !important; }
+    .slider-val { font-size: 10pt !important; }
+    .slider-row-label { font-size: 9pt !important; }
+    canvas { max-height: 180px !important; }
+    h1 { font-size: 18pt !important; margin-bottom: 2mm !important; }
+    table { font-size: 9pt !important; }
+    .page-break { page-break-before: always; break-before: page; }
+    .badge { font-size: 9pt !important; }
+    /* Keep two-column layout for params/results on print */
+    .print-two-col { display: grid !important; grid-template-columns: 1fr 1.6fr !important; gap: 4mm !important; }
+    .print-params .p-5 { padding: 8px !important; }
+    .print-params > div { margin-bottom: 3mm; }
+    .print-params .space-y-5 > * + * { margin-top: 2mm !important; }
+    .print-footer { display: block !important; font-size: 8pt; color: #6B7280; text-align: center; margin-top: 4mm; }
+  }
+  .print-footer { display: none; }
+</style>
 </head>
-<body>
-<h2>Simulateur Hotel Alexandre III</h2>
-<p>Redirection vers le simulateur...</p>
-<p>Si la redirection ne fonctionne pas : <a href="https://files.catbox.moe/39t213.html">cliquer ici</a></p>
-<script>location.replace("https://files.catbox.moe/39t213.html");</script>
+<body class="p-6 md:p-10">
+<div class="max-w-7xl mx-auto">
+
+  <!-- HEADER -->
+  <div class="mb-6 flex justify-between items-start flex-wrap gap-3">
+    <div>
+      <h1 class="text-3xl font-bold" style="color:var(--navy)">Simulateur – Hôtel Alexandre III</h1>
+      <p class="text-sm text-slate-500 mt-1">15 Bd Alexandre III, Cannes &middot; 11 chambres existantes &middot; Scénario exploitation hôtelière avec mandat de gestion FDL</p>
+    </div>
+    <button class="btn btn-primary no-print" onclick="window.print()">
+      Imprimer / Exporter PDF
+    </button>
+  </div>
+
+  <!-- PRESETS -->
+  <div class="mb-4 flex flex-wrap gap-2 no-print">
+    <span class="text-sm text-slate-600 self-center mr-2 font-semibold">Presets :</span>
+    <button class="btn" onclick="applyPreset('buyout')">Offre basse 2,5 M€ – pas de travaux</button>
+    <button class="btn" onclick="applyPreset('reno')">Cible 2,75 M€ + reno 4★ 1,5 M€</button>
+    <button class="btn" onclick="applyPreset('ext')">Cible 3,0 M€ + extension 3 M€ / 15 chbres</button>
+    <button class="btn" onclick="applyPreset('stress')">Stress test – ADR bas / Occ basse</button>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 print-two-col">
+
+    <!-- INPUTS -->
+    <div class="lg:col-span-1 card print-params">
+      <div class="card-header">Paramètres</div>
+      <div class="p-5 space-y-5">
+
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Prix d'acquisition (FAI)</label><span class="slider-val" id="v_prix"></span></div>
+          <input type="range" id="s_prix" min="2500000" max="4300000" step="50000" value="2750000" />
+          <div class="flex justify-between text-xs text-slate-400 mt-1 no-print"><span>2,5 M€</span><span>4,3 M€</span></div>
+        </div>
+
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Travaux / CAPEX</label><span class="slider-val" id="v_capex"></span></div>
+          <input type="range" id="s_capex" min="0" max="3500000" step="100000" value="1500000" />
+          <div class="flex justify-between text-xs text-slate-400 mt-1 no-print"><span>0</span><span>3,5 M€</span></div>
+        </div>
+
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Nombre de chambres</label><span class="slider-val" id="v_chbres"></span></div>
+          <input type="range" id="s_chbres" min="11" max="18" step="1" value="11" />
+          <div class="flex justify-between text-xs text-slate-400 mt-1 no-print"><span>11</span><span>18</span></div>
+        </div>
+
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">ADR (prix moyen / nuit)</label><span class="slider-val" id="v_adr"></span></div>
+          <input type="range" id="s_adr" min="100" max="450" step="5" value="260" />
+          <div class="flex justify-between text-xs text-slate-400 mt-1 no-print"><span>100 €</span><span>450 €</span></div>
+        </div>
+
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Taux d'occupation (TO)</label><span class="slider-val" id="v_to"></span></div>
+          <input type="range" id="s_to" min="0.40" max="0.90" step="0.01" value="0.70" />
+          <div class="flex justify-between text-xs text-slate-400 mt-1 no-print"><span>40 %</span><span>90 %</span></div>
+        </div>
+
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Jours d'ouverture / an</label><span class="slider-val" id="v_jours"></span></div>
+          <input type="range" id="s_jours" min="180" max="365" step="5" value="320" />
+          <div class="flex justify-between text-xs text-slate-400 mt-1 no-print"><span>180</span><span>365</span></div>
+        </div>
+
+        <hr class="border-slate-200" />
+
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">CA F&amp;B + autres (% hébergement)</label><span class="slider-val" id="v_fb"></span></div>
+          <input type="range" id="s_fb" min="0" max="0.40" step="0.01" value="0.18" />
+        </div>
+
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Coûts directs (% CA)</label><span class="slider-val" id="v_cd"></span></div>
+          <input type="range" id="s_cd" min="0.10" max="0.35" step="0.01" value="0.22" />
+        </div>
+
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Masse salariale annuelle</label><span class="slider-val" id="v_ms"></span></div>
+          <input type="range" id="s_ms" min="100000" max="450000" step="10000" value="280000" />
+        </div>
+
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Charges fixes annuelles</label><span class="slider-val" id="v_cf"></span></div>
+          <input type="range" id="s_cf" min="40000" max="160000" step="5000" value="95000" />
+        </div>
+
+        <hr class="border-slate-200" />
+
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label" style="color:var(--gold)">Mandat de gestion FDL (% CA)</label><span class="slider-val" id="v_mgmt"></span></div>
+          <input type="range" id="s_mgmt" min="0" max="0.15" step="0.005" value="0.10" />
+          <p class="text-xs text-slate-500 mt-1 italic no-print">Facturé par FDL : cost hôtel / revenu FDL</p>
+        </div>
+
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label" style="color:var(--gold)">Ménage (% CA)</label><span class="slider-val" id="v_menage"></span></div>
+          <input type="range" id="s_menage" min="0" max="0.20" step="0.005" value="0.10" />
+          <p class="text-xs text-slate-500 mt-1 italic no-print">Prestation ménage externalisée (Femme de Ménage / Turnover)</p>
+        </div>
+
+        <hr class="border-slate-200" />
+
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">LTV bancaire</label><span class="slider-val" id="v_ltv"></span></div>
+          <input type="range" id="s_ltv" min="0.50" max="0.85" step="0.01" value="0.75" />
+        </div>
+
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Taux d'intérêt</label><span class="slider-val" id="v_taux"></span></div>
+          <input type="range" id="s_taux" min="0.030" max="0.065" step="0.001" value="0.045" />
+        </div>
+
+        <div>
+          <div class="flex justify-between mb-1"><label class="text-sm font-semibold slider-row-label">Durée du prêt (ans)</label><span class="slider-val" id="v_duree"></span></div>
+          <input type="range" id="s_duree" min="7" max="30" step="1" value="20" />
+        </div>
+
+        <div>
+          <div class="text-sm font-semibold mb-2 slider-row-label">Structure de la dette</div>
+          <div class="seg">
+            <button id="b_amort" class="active" onclick="setDebtType('amort')">Amortissable</button>
+            <button id="b_infine" onclick="setDebtType('infine')">In fine</button>
+          </div>
+          <p class="text-xs text-slate-500 mt-2 italic no-print" id="debt_help">Amortissable : capital + intérêts sur la durée. In fine : intérêts seulement pendant la durée, capital in fine.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="lg:col-span-2 space-y-6">
+
+      <!-- BIG KPIs -->
+      <div class="card">
+        <div class="card-header flex justify-between items-center">
+          <span>Résultats – année stabilisée</span>
+          <span id="verdict" class="badge badge-ok">À calibrer</span>
+        </div>
+        <div class="p-5">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="kpi"><div class="kpi-label">CA total</div><div class="kpi-value" id="k_ca"></div><div class="kpi-sub" id="k_revpar"></div></div>
+            <div class="kpi"><div class="kpi-label">EBITDA hôtel</div><div class="kpi-value" id="k_ebitda"></div><div class="kpi-sub" id="k_margin"></div></div>
+            <div class="kpi"><div class="kpi-label">DSCR</div><div class="kpi-value" id="k_dscr"></div><div class="kpi-sub" id="k_dscr_sub"></div></div>
+            <div class="kpi"><div class="kpi-label">Cash-flow après dette</div><div class="kpi-value" id="k_cf"></div><div class="kpi-sub">hôtel seul</div></div>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+            <div class="kpi" style="background:#FEF7E6;border-color:#F4D488"><div class="kpi-label" style="color:var(--gold)">Revenu mandat FDL</div><div class="kpi-value" id="k_mgmt"></div><div class="kpi-sub" id="k_mgmt_sub">10% CA par défaut</div></div>
+            <div class="kpi" style="background:#FEF7E6;border-color:#F4D488"><div class="kpi-label" style="color:var(--gold)">CF total FDL (hôtel + mandat)</div><div class="kpi-value" id="k_cf_fdl"></div><div class="kpi-sub">consolidé</div></div>
+            <div class="kpi"><div class="kpi-label">Investissement total</div><div class="kpi-value" id="k_inv"></div><div class="kpi-sub" id="k_prix_chbre"></div></div>
+            <div class="kpi"><div class="kpi-label">Equity requis</div><div class="kpi-value" id="k_equity"></div><div class="kpi-sub" id="k_coc"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- P&L DETAIL -->
+      <div class="card">
+        <div class="card-header">Compte de résultat stabilisé</div>
+        <div class="p-5">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-slate-200">
+                <th class="text-left py-2 font-semibold">Poste</th>
+                <th class="text-right py-2 font-semibold">Montant (€)</th>
+                <th class="text-right py-2 font-semibold">% CA</th>
+              </tr>
+            </thead>
+            <tbody id="pnl_body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CHART + DEBT -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="card">
+          <div class="card-header">Sensibilité EBITDA vs ADR</div>
+          <div class="p-5"><canvas id="chart_sens" height="200"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-header">Financement &amp; dette</div>
+          <div class="p-5">
+            <table class="w-full text-sm">
+              <tbody id="debt_body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHART CASH-FLOW -->
+      <div class="card">
+        <div class="card-header">Timeline cash-flow 5 ans (avec ramp-up)</div>
+        <div class="p-5"><canvas id="chart_cf" height="140"></canvas></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="print-footer">
+    Simulateur Hôtel Alexandre III &middot; Groupe FDL &middot; Julien Madar &middot; Imprimé le <span id="today"></span>
+  </div>
+
+  <div class="mt-6 text-xs text-slate-400 text-center no-print">
+    Simulateur Hôtel Alexandre III &middot; Groupe FDL &middot; Construit avril 2026
+  </div>
+</div>
+
+<script>
+// ========= HELPERS =========
+const fmt = n => new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);
+const pct = n => (n*100).toFixed(1)+' %';
+
+// ========= STATE =========
+const ids = ['prix','capex','chbres','adr','to','jours','fb','cd','ms','cf','mgmt','menage','ltv','taux','duree'];
+const inputs = {};
+ids.forEach(id => inputs[id] = document.getElementById('s_'+id));
+
+let debtType = 'amort'; // 'amort' or 'infine'
+function setDebtType(t){
+  debtType = t;
+  document.getElementById('b_amort').classList.toggle('active', t==='amort');
+  document.getElementById('b_infine').classList.toggle('active', t==='infine');
+  compute();
+}
+
+// ========= PRESETS =========
+function applyPreset(name){
+  const P = {
+    buyout:{prix:2500000,capex:0,chbres:11,adr:140,to:0.72,jours:240,fb:0.08,cd:0.20,ms:140000,cf:60000,mgmt:0.10,menage:0.10,ltv:0.75,taux:0.045,duree:20},
+    reno  :{prix:2750000,capex:1500000,chbres:11,adr:280,to:0.72,jours:320,fb:0.18,cd:0.22,ms:280000,cf:95000,mgmt:0.10,menage:0.10,ltv:0.75,taux:0.045,duree:20},
+    ext   :{prix:3000000,capex:3000000,chbres:15,adr:310,to:0.72,jours:340,fb:0.25,cd:0.24,ms:360000,cf:125000,mgmt:0.10,menage:0.10,ltv:0.75,taux:0.045,duree:25},
+    stress:{prix:2750000,capex:1500000,chbres:11,adr:210,to:0.60,jours:280,fb:0.15,cd:0.25,ms:280000,cf:100000,mgmt:0.10,menage:0.10,ltv:0.75,taux:0.055,duree:20},
+  };
+  const p = P[name]; if(!p) return;
+  ids.forEach(id => inputs[id].value = p[id]);
+  compute();
+}
+
+// ========= CORE CALC =========
+function calc(p){
+  const acquisition = p.prix * 1.07;              // 7% frais notaire estimés
+  const invest = acquisition + p.capex;
+  const nights = p.chbres * p.jours * p.to;
+  const revHeberg = nights * p.adr;
+  const revFB = revHeberg * p.fb;
+  const ca = revHeberg + revFB;
+
+  const coutsDirects = ca * p.cd;
+  const menage = ca * p.menage;
+  const masseSal = Number(p.ms);
+  const chargesFixes = Number(p.cf);
+  const mandat = ca * p.mgmt;                     // cost for hotel
+
+  const ebitda = ca - coutsDirects - menage - masseSal - chargesFixes - mandat;
+  const margin = ca>0 ? ebitda/ca : 0;
+  const revpar = p.to * p.adr;
+  const prixChbre = p.prix / p.chbres;
+
+  // Dette
+  const loan = invest * p.ltv;
+  const equity = invest - loan;
+  let mensual, annuite;
+  if(debtType === 'infine'){
+    // Intérêts seulement pendant la durée (capital remboursé à terme)
+    const interet = loan * p.taux;
+    annuite = interet;
+    mensual = interet / 12;
+  } else {
+    const i = p.taux / 12;
+    const n = p.duree * 12;
+    mensual = loan * i / (1 - Math.pow(1+i, -n));
+    annuite = mensual * 12;
+  }
+  const dscr = annuite>0 ? ebitda / annuite : 0;
+  const cfHotel = ebitda - annuite;
+  const cfFDL = cfHotel + mandat;
+  const cocHotel = equity>0 ? cfHotel / equity : 0;
+  const cocFDL = equity>0 ? cfFDL / equity : 0;
+
+  return {
+    acquisition, invest, nights, revHeberg, revFB, ca,
+    coutsDirects, menage, masseSal, chargesFixes, mandat,
+    ebitda, margin, revpar, prixChbre,
+    loan, equity, mensual, annuite, dscr,
+    cfHotel, cfFDL, cocHotel, cocFDL
+  };
+}
+
+// ========= CHARTS =========
+let chartSens, chartCF;
+
+function drawSens(p){
+  const ctx = document.getElementById('chart_sens').getContext('2d');
+  const adrs = [150,200,250,300,350,400];
+  const toList = [0.55,0.65,0.75];
+  const datasets = toList.map((to,idx) => {
+    const colors = ['#B78A2E','#1B2A4E','#047857'];
+    return {
+      label: 'TO '+(to*100).toFixed(0)+' %',
+      data: adrs.map(adr => {
+        const sim = calc({...p, adr, to});
+        return Math.round(sim.ebitda);
+      }),
+      borderColor: colors[idx],
+      backgroundColor: colors[idx]+'22',
+      tension: 0.25, fill:false, borderWidth:2
+    };
+  });
+  if(chartSens) chartSens.destroy();
+  chartSens = new Chart(ctx, {
+    type:'line',
+    data:{labels:adrs.map(a=>a+' €'), datasets},
+    options:{
+      plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}}},
+      scales:{
+        y:{ticks:{callback:v=>fmt(v)},grid:{color:'#F3F4F6'}},
+        x:{grid:{display:false}}
+      }
+    }
+  });
+}
+
+function drawCF(p){
+  const ctx = document.getElementById('chart_cf').getContext('2d');
+  const stab = calc(p);
+  const factors = [0.30, 0.80, 1.00, 1.02, 1.04];
+  const ebs = factors.map(f => stab.ebitda * f - stab.mandat * (f-1));
+  const cfH = ebs.map(e => e - stab.annuite);
+  const cfF = cfH.map((c,i) => c + stab.mandat * factors[i]);
+  if(chartCF) chartCF.destroy();
+  chartCF = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels:['An 1','An 2','An 3','An 4','An 5'],
+      datasets:[
+        {label:'CF hôtel après dette', data:cfH, backgroundColor:'#1B2A4E'},
+        {label:'CF FDL consolidé (hôtel + mandat)', data:cfF, backgroundColor:'#B78A2E'},
+      ]
+    },
+    options:{
+      plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}}},
+      scales:{
+        y:{ticks:{callback:v=>fmt(v)},grid:{color:'#F3F4F6'}},
+        x:{grid:{display:false}}
+      }
+    }
+  });
+}
+
+// ========= RENDER =========
+function render(p, r){
+  // Slider labels
+  document.getElementById('v_prix').textContent  = fmt(p.prix);
+  document.getElementById('v_capex').textContent = fmt(p.capex);
+  document.getElementById('v_chbres').textContent= p.chbres;
+  document.getElementById('v_adr').textContent   = p.adr + ' €';
+  document.getElementById('v_to').textContent    = pct(p.to);
+  document.getElementById('v_jours').textContent = p.jours + ' j';
+  document.getElementById('v_fb').textContent    = pct(p.fb);
+  document.getElementById('v_cd').textContent    = pct(p.cd);
+  document.getElementById('v_ms').textContent    = fmt(p.ms);
+  document.getElementById('v_cf').textContent    = fmt(p.cf);
+  document.getElementById('v_mgmt').textContent  = pct(p.mgmt);
+  document.getElementById('v_menage').textContent= pct(p.menage);
+  document.getElementById('v_ltv').textContent   = pct(p.ltv);
+  document.getElementById('v_taux').textContent  = pct(p.taux);
+  document.getElementById('v_duree').textContent = p.duree + ' ans';
+
+  // KPIs
+  document.getElementById('k_ca').textContent     = fmt(r.ca);
+  document.getElementById('k_revpar').textContent = 'RevPAR '+fmt(r.revpar);
+  document.getElementById('k_ebitda').textContent = fmt(r.ebitda);
+  document.getElementById('k_margin').textContent = 'Marge '+pct(r.margin);
+  document.getElementById('k_dscr').textContent   = r.dscr.toFixed(2)+'x';
+  document.getElementById('k_dscr_sub').textContent = r.dscr>=1.2?'bancable':r.dscr>=1?'limite':'non-bancable';
+  document.getElementById('k_cf').textContent     = fmt(r.cfHotel);
+  document.getElementById('k_mgmt').textContent   = fmt(r.mandat);
+  document.getElementById('k_mgmt_sub').textContent = pct(p.mgmt)+' du CA';
+  document.getElementById('k_cf_fdl').textContent = fmt(r.cfFDL);
+  document.getElementById('k_inv').textContent    = fmt(r.invest);
+  document.getElementById('k_prix_chbre').textContent = fmt(r.prixChbre)+' / chbre';
+  document.getElementById('k_equity').textContent = fmt(r.equity);
+  document.getElementById('k_coc').textContent    = 'CoC hôtel '+pct(r.cocHotel)+' | FDL '+pct(r.cocFDL);
+
+  // P&L detail
+  const pnl = [
+    ['Chiffre d\'affaires hébergement', r.revHeberg, null, false],
+    ['Chiffre d\'affaires F&amp;B + autres', r.revFB, null, false],
+    ['<b>Total CA</b>', r.ca, r.ca, true],
+    ['Coûts directs', -r.coutsDirects, r.ca, false],
+    ['Ménage (externalisé)', -r.menage, r.ca, false],
+    ['Masse salariale', -r.masseSal, r.ca, false],
+    ['Charges fixes', -r.chargesFixes, r.ca, false],
+    ['Mandat de gestion FDL', -r.mandat, r.ca, false],
+    ['<b>EBITDA hôtel</b>', r.ebitda, r.ca, true],
+    ['Service de la dette (annuel)', -r.annuite, r.ca, false],
+    ['<b>Cash-flow hôtel après dette</b>', r.cfHotel, r.ca, true],
+    ['+ Revenu mandat (vers FDL)', r.mandat, r.ca, false],
+    ['<b>Cash-flow FDL consolidé</b>', r.cfFDL, r.ca, true],
+  ];
+  const body = document.getElementById('pnl_body');
+  body.innerHTML = pnl.map(([lbl,val,base,emph]) => {
+    const pctStr = base && base>0 ? pct(val/base) : '';
+    const color = val>=0 ? 'color:inherit' : 'color:#B91C1C';
+    const bg = emph ? 'background:#F2F4F8' : '';
+    return `<tr style="${bg}"><td class="py-1.5 ${emph?'':'pl-3'}">${lbl}</td><td class="text-right py-1.5 font-mono" style="${color}">${fmt(val)}</td><td class="text-right py-1.5 text-slate-500 text-xs">${pctStr}</td></tr>`;
+  }).join('');
+
+  // Debt table
+  const typeLbl = debtType === 'infine' ? 'In fine' : 'Amortissable';
+  const dt = [
+    ['Prix acquisition (FAI)', fmt(p.prix)],
+    ['Frais de notaire (7%)', fmt(p.prix*0.07)],
+    ['Travaux / CAPEX', fmt(p.capex)],
+    ['<b>Investissement total</b>', '<b>'+fmt(r.invest)+'</b>'],
+    ['Structure', '<b>'+typeLbl+'</b>'],
+    ['LTV', pct(p.ltv)],
+    ['Montant emprunté', fmt(r.loan)],
+    ['Equity requis', fmt(r.equity)],
+    ['Taux / Durée', pct(p.taux)+' / '+p.duree+' ans'],
+    [debtType==='infine' ? 'Intérêts mensuels' : 'Mensualité', fmt(r.mensual)],
+    ['<b>'+(debtType==='infine'?'Intérêts annuels (annuité)':'Annuité')+'</b>', '<b>'+fmt(r.annuite)+'</b>'],
+  ];
+  if(debtType === 'infine'){
+    dt.push(['Capital à rembourser in fine', '<b style="color:#B91C1C">'+fmt(r.loan)+'</b>']);
+  }
+  document.getElementById('debt_body').innerHTML = dt.map(([k,v])=>`<tr class="border-b border-slate-100"><td class="py-1.5 text-slate-600">${k}</td><td class="text-right py-1.5 font-mono">${v}</td></tr>`).join('');
+
+  // Verdict badge
+  const badge = document.getElementById('verdict');
+  if(r.dscr >= 1.25 && r.cfFDL > 0){
+    badge.className = 'badge badge-ok'; badge.textContent = 'Viable – à négocier';
+  } else if(r.dscr >= 1.0 && r.cfFDL > 0){
+    badge.className = 'badge badge-warn'; badge.textContent = 'Limite – attention marge';
+  } else if(r.dscr >= 0.9){
+    badge.className = 'badge badge-warn'; badge.textContent = 'Sous la ligne d\'eau';
+  } else {
+    badge.className = 'badge badge-ko'; badge.textContent = 'Non-bancable';
+  }
+}
+
+// ========= MAIN =========
+function compute(){
+  const p = {};
+  ids.forEach(id => p[id] = parseFloat(inputs[id].value));
+  const r = calc(p);
+  render(p, r);
+  drawSens(p);
+  drawCF(p);
+}
+
+ids.forEach(id => inputs[id].addEventListener('input', compute));
+
+// Set today's date in footer
+document.getElementById('today').textContent = new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+
+compute();
+</script>
 </body>
 </html>
