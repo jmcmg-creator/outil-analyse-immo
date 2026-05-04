@@ -68,14 +68,29 @@
 <div class="max-w-7xl mx-auto">
 
   <!-- HEADER -->
-  <div class="mb-5 flex justify-between items-start flex-wrap gap-3">
+  <div class="mb-4 flex justify-between items-start flex-wrap gap-3">
     <div>
-      <h1 class="text-2xl md:text-3xl font-bold" style="color:var(--navy)">Simulateur d'investissement hôtelier</h1>
+      <h1 class="text-2xl md:text-3xl font-bold" style="color:var(--navy)">Outil d'analyse immo hôtelier</h1>
       <p class="text-sm text-slate-500 mt-1">Méthodologie expertale (B&E Partners) — Murs (capitalisation + DCF) + Fonds (barèmes + EBE) + financement + sortie</p>
     </div>
-    <div class="flex gap-2 no-print">
-      <input type="text" id="dealName" class="text-input" placeholder="Nom du deal (ex: Hôtel X)" style="min-width:220px" />
-      <button class="btn btn-primary" onclick="window.print()">Imprimer / PDF</button>
+    <button class="btn btn-primary no-print" onclick="window.print()">Imprimer / PDF</button>
+  </div>
+
+  <!-- GESTION DES DEALS -->
+  <div class="card mb-4 no-print" style="background:#FAFBFC">
+    <div class="p-3 flex flex-wrap gap-2 items-center">
+      <span class="font-semibold text-sm" style="color:var(--navy)">📁 Mes deals :</span>
+      <select id="dealSelector" class="text-input" style="min-width:280px;cursor:pointer" onchange="onDealSelected()"></select>
+      <input type="text" id="dealName" class="text-input" placeholder="Nom du deal courant" style="min-width:220px" oninput="onDealNameChanged()" />
+      <button class="btn" onclick="newDeal()">+ Nouveau</button>
+      <button class="btn" onclick="saveCurrentDeal(true)">💾 Sauvegarder</button>
+      <button class="btn" onclick="duplicateCurrentDeal()">⎘ Dupliquer</button>
+      <button class="btn" onclick="renameCurrentDeal()">✏️ Renommer</button>
+      <button class="btn" onclick="deleteCurrentDeal()" style="color:#B91C1C">🗑 Supprimer</button>
+      <button class="btn" onclick="exportAllDeals()">⤓ Export</button>
+      <button class="btn" onclick="document.getElementById('dealImport').click()">⤒ Import</button>
+      <input type="file" id="dealImport" accept=".json" style="display:none" onchange="importDeals(event)" />
+      <span class="text-xs text-slate-500 italic" id="dealStatus"></span>
     </div>
   </div>
 
@@ -903,7 +918,213 @@ function compute(){
   drawCharts(p, r);
 }
 
-ids.forEach(id => inputs[id].addEventListener('input', compute));
+ids.forEach(id => inputs[id].addEventListener('input', () => { compute(); autoSaveDeal(); }));
+
+// ============== DEAL MANAGER (localStorage) ==============
+const DEALS_KEY = 'outilImmoDeals_v1';
+const CURRENT_KEY = 'outilImmoCurrent_v1';
+
+function loadAllDeals(){
+  try { return JSON.parse(localStorage.getItem(DEALS_KEY)) || []; }
+  catch(e) { return []; }
+}
+function saveAllDeals(deals){ localStorage.setItem(DEALS_KEY, JSON.stringify(deals)); }
+function getCurrentId(){ return localStorage.getItem(CURRENT_KEY); }
+function setCurrentId(id){ id ? localStorage.setItem(CURRENT_KEY, id) : localStorage.removeItem(CURRENT_KEY); }
+
+function captureState(){
+  const params = {};
+  ids.forEach(id => params[id] = parseFloat(inputs[id].value));
+  return { params, debtType, dealName: document.getElementById('dealName').value };
+}
+
+function applyState(s){
+  if(s.params) ids.forEach(id => { if(id in s.params) inputs[id].value = s.params[id]; });
+  if(s.debtType) setDebtType(s.debtType);
+  if(s.dealName !== undefined) document.getElementById('dealName').value = s.dealName;
+  compute();
+}
+
+function refreshSelector(){
+  const sel = document.getElementById('dealSelector');
+  const deals = loadAllDeals().sort((a,b) => (b.updatedAt||'').localeCompare(a.updatedAt||''));
+  const cur = getCurrentId();
+  sel.innerHTML = '<option value="">— Charger un deal —</option>' +
+    deals.map(d => `<option value="${d.id}" ${d.id===cur?'selected':''}>${escapeHtml(d.name)} · ${formatDate(d.updatedAt)}</option>`).join('');
+}
+
+function genId(){ return 'd_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); }
+
+function newDeal(){
+  const name = prompt('Nom du nouveau deal :', 'Deal ' + new Date().toLocaleDateString('fr-FR'));
+  if(!name) return;
+  const id = genId();
+  const deals = loadAllDeals();
+  const state = captureState();
+  state.dealName = name;
+  document.getElementById('dealName').value = name;
+  const now = new Date().toISOString();
+  deals.push({ id, name, createdAt: now, updatedAt: now, ...state });
+  saveAllDeals(deals);
+  setCurrentId(id);
+  refreshSelector();
+  showStatus('Deal créé : ' + name);
+}
+
+function saveCurrentDeal(showMsg){
+  let id = getCurrentId();
+  const deals = loadAllDeals();
+  const state = captureState();
+  if(!id || !deals.find(d => d.id === id)){
+    // No current deal — create one with the dealName or auto name
+    const name = (state.dealName && state.dealName.trim()) || 'Deal sans nom ' + new Date().toLocaleDateString('fr-FR');
+    id = genId();
+    const now = new Date().toISOString();
+    deals.push({ id, name, createdAt: now, updatedAt: now, ...state });
+    setCurrentId(id);
+  } else {
+    const idx = deals.findIndex(d => d.id === id);
+    const newName = (state.dealName && state.dealName.trim()) || deals[idx].name;
+    deals[idx] = { ...deals[idx], ...state, name: newName, updatedAt: new Date().toISOString() };
+  }
+  saveAllDeals(deals);
+  refreshSelector();
+  if(showMsg) showStatus('Sauvegardé ✓');
+}
+
+function duplicateCurrentDeal(){
+  const id = getCurrentId();
+  const deals = loadAllDeals();
+  const cur = deals.find(d => d.id === id);
+  if(!cur){ showStatus('Aucun deal courant à dupliquer'); return; }
+  const newName = prompt('Nom de la copie :', cur.name + ' (copie)');
+  if(!newName) return;
+  const newId = genId();
+  const now = new Date().toISOString();
+  const copy = { ...cur, id: newId, name: newName, createdAt: now, updatedAt: now };
+  copy.dealName = newName;
+  deals.push(copy);
+  saveAllDeals(deals);
+  setCurrentId(newId);
+  document.getElementById('dealName').value = newName;
+  refreshSelector();
+  showStatus('Dupliqué : ' + newName);
+}
+
+function renameCurrentDeal(){
+  const id = getCurrentId();
+  const deals = loadAllDeals();
+  const idx = deals.findIndex(d => d.id === id);
+  if(idx === -1){ showStatus('Aucun deal sélectionné'); return; }
+  const newName = prompt('Renommer le deal :', deals[idx].name);
+  if(!newName) return;
+  deals[idx].name = newName;
+  deals[idx].dealName = newName;
+  deals[idx].updatedAt = new Date().toISOString();
+  saveAllDeals(deals);
+  document.getElementById('dealName').value = newName;
+  refreshSelector();
+  showStatus('Renommé : ' + newName);
+}
+
+function deleteCurrentDeal(){
+  const id = getCurrentId();
+  const deals = loadAllDeals();
+  const cur = deals.find(d => d.id === id);
+  if(!cur){ showStatus('Aucun deal sélectionné'); return; }
+  if(!confirm('Supprimer le deal « ' + cur.name + ' » ? Action irréversible.')) return;
+  saveAllDeals(deals.filter(d => d.id !== id));
+  setCurrentId(null);
+  document.getElementById('dealName').value = '';
+  refreshSelector();
+  showStatus('Supprimé');
+}
+
+function onDealSelected(){
+  const id = document.getElementById('dealSelector').value;
+  if(!id){ setCurrentId(null); return; }
+  const deal = loadAllDeals().find(d => d.id === id);
+  if(!deal) return;
+  setCurrentId(id);
+  applyState(deal);
+  showStatus('Chargé : ' + deal.name);
+}
+
+function onDealNameChanged(){
+  const id = getCurrentId();
+  const deals = loadAllDeals();
+  const idx = deals.findIndex(d => d.id === id);
+  if(idx === -1) return;
+  deals[idx].name = document.getElementById('dealName').value || deals[idx].name;
+  deals[idx].dealName = document.getElementById('dealName').value;
+  deals[idx].updatedAt = new Date().toISOString();
+  saveAllDeals(deals);
+  refreshSelector();
+}
+
+let saveTimer;
+function autoSaveDeal(){
+  if(saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    if(getCurrentId()) saveCurrentDeal(false);
+  }, 1500);
+}
+
+function exportAllDeals(){
+  const deals = loadAllDeals();
+  if(!deals.length){ showStatus('Aucun deal à exporter'); return; }
+  const blob = new Blob([JSON.stringify(deals, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'deals-immo-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showStatus('Export : ' + deals.length + ' deal(s)');
+}
+
+function importDeals(ev){
+  const file = ev.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if(!Array.isArray(imported)) throw new Error('Format invalide');
+      const existing = loadAllDeals();
+      const existingIds = new Set(existing.map(d => d.id));
+      let added = 0;
+      imported.forEach(d => {
+        if(!d.id || existingIds.has(d.id)) d.id = genId();
+        existing.push(d);
+        added++;
+      });
+      saveAllDeals(existing);
+      refreshSelector();
+      showStatus('Importé : ' + added + ' deal(s)');
+    } catch(err){
+      showStatus('Erreur import : ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  ev.target.value = '';
+}
+
+function showStatus(msg){
+  const el = document.getElementById('dealStatus');
+  el.textContent = msg;
+  if(msg) setTimeout(() => { if(el.textContent === msg) el.textContent = ''; }, 3000);
+}
+function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function formatDate(iso){ if(!iso) return ''; try { return new Date(iso).toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit', year:'2-digit'}); } catch(e) { return ''; } }
+
+// Init
+refreshSelector();
+const curId = getCurrentId();
+if(curId){
+  const d = loadAllDeals().find(x => x.id === curId);
+  if(d) applyState(d);
+}
+
 compute();
 </script>
 </body>
