@@ -335,6 +335,24 @@
         </div>
       </div>
 
+      <!-- COMPARABLES PRIX/CLÉ -->
+      <div class="card">
+        <div class="card-header" style="background:#5B6982">9 · Comparables — prix par clé</div>
+        <div class="p-4 space-y-3">
+          <p class="help no-print">3ème méthode : valorisation par transactions comparables du secteur. Recommandation auto-calibrée par les presets.</p>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Prix de référence par clé (Murs+Fonds)</label><span class="slider-val" id="v_pxClefRef"></span></div>
+            <input type="range" id="s_pxClefRef" min="80000" max="1500000" step="10000" value="280000" />
+            <p class="help no-print">Paris éco : 150-250 k€ · Paris 3* : 250-400 k€ · Paris 4* : 400-600 k€ · 5*/Palace : 700-1200 k€ · Cannes/Nice 4* : 350-550 k€ · Province 3* : 80-180 k€</p>
+          </div>
+          <div>
+            <div class="flex justify-between"><label class="row-label">Pondération méthode revenue</label><span class="slider-val" id="v_weightRev"></span></div>
+            <input type="range" id="s_weightRev" min="0" max="1" step="0.05" value="0.7" />
+            <p class="help no-print">70% revenue / 30% comparables = pondération expertale standard</p>
+          </div>
+        </div>
+      </div>
+
       <!-- SORTIE -->
       <div class="card">
         <div class="card-header card-header-green">8 · Sortie &amp; horizon</div>
@@ -360,22 +378,86 @@
     <!-- ============ COLONNE 2 & 3 : RÉSULTATS ============ -->
     <div class="lg:col-span-2 space-y-5">
 
-      <!-- VALORISATION EXPERTALE (top) -->
+      <!-- VALORISATION EXPERTALE (synthèse principale) -->
       <div class="card">
         <div class="card-header flex justify-between items-center">
-          <span>Valorisation expertale — synthèse Murs + Fonds</span>
+          <span class="text-base">Synthèse de valorisation</span>
           <span id="valVerdict" class="badge"></span>
         </div>
-        <div class="p-4">
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-            <div class="kpi" style="background:#EEF2FF;border-color:#A5B4FC"><div class="kpi-label">Valeur MURS (moyenne)</div><div class="kpi-value" id="k_valMurs"></div><div class="kpi-sub" id="k_valMursPm"></div></div>
-            <div class="kpi" style="background:#FEF7E6;border-color:#F4D488"><div class="kpi-label" style="color:var(--gold)">Valeur FONDS (moyenne)</div><div class="kpi-value" id="k_valFonds"></div><div class="kpi-sub" id="k_valFondsPm"></div></div>
-            <div class="kpi kpi-big" style="background:#ECFDF5;border-color:#86EFAC"><div class="kpi-label" style="color:var(--green)">VALEUR TOTALE Murs+Fonds</div><div class="kpi-value" id="k_valTotal"></div><div class="kpi-sub" id="k_valTotalPm"></div></div>
+        <div class="p-5">
+          <!-- Headline finale : valeur retenue (moyenne pondérée) -->
+          <div class="rounded-xl p-5 mb-4" style="background:linear-gradient(135deg,#ECFDF5 0%,#D1FAE5 100%);border:1px solid #86EFAC">
+            <div class="flex justify-between items-start flex-wrap gap-3">
+              <div>
+                <div class="text-xs uppercase tracking-wider font-semibold" style="color:var(--green)">Valeur retenue (moyenne pondérée)</div>
+                <div class="text-4xl font-bold mt-1" style="color:var(--green)" id="k_valFinal">—</div>
+                <div class="text-xs text-slate-500 mt-1" id="k_valFinalSub">—</div>
+              </div>
+              <div class="text-right">
+                <div class="text-xs uppercase tracking-wider font-semibold text-slate-500">Vs prix proposé</div>
+                <div class="text-2xl font-bold mt-1" id="k_vsPrix">—</div>
+                <div class="text-xs text-slate-500 mt-1" id="k_vsPrixSub">prix proposé : <span id="k_prixRef"></span></div>
+              </div>
+            </div>
           </div>
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
-            <div class="kpi"><div class="kpi-label">Vs prix d'acquisition</div><div class="kpi-value" id="k_vsPrix"></div><div class="kpi-sub" id="k_vsPrixSub">Comparaison méthodologie expertale vs prix proposé</div></div>
-            <div class="kpi"><div class="kpi-label">Loyer admissible</div><div class="kpi-value" id="k_loyer"></div><div class="kpi-sub" id="k_loyerSub">Méthode hôtelière IFEI</div></div>
-            <div class="kpi"><div class="kpi-label">Cross-check Murs+Fonds vs CA</div><div class="kpi-value" id="k_xCA"></div><div class="kpi-sub">Réf. Paris 2025 : 9.5× · Province : 5-7×</div></div>
+
+          <!-- 3 méthodes en parallèle -->
+          <div class="text-xs uppercase tracking-wider font-semibold text-slate-500 mb-2">Méthodes de valorisation détaillées</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="rounded-lg p-3" style="background:#EEF2FF;border:1px solid #A5B4FC">
+              <div class="text-xs uppercase tracking-wider font-semibold" style="color:#4F46E5">A · Méthode revenue</div>
+              <div class="text-2xl font-bold mt-1" style="color:#1E1B4B" id="k_valTotal">—</div>
+              <div class="text-xs text-slate-600 mt-1">Murs (cap+DCF) + Fonds (barèmes+EBE)</div>
+              <div class="flex justify-between mt-2 pt-2 border-t border-indigo-200 text-xs">
+                <span class="text-slate-500">Murs</span><span class="font-mono font-semibold" id="k_valMurs">—</span>
+              </div>
+              <div class="flex justify-between text-xs">
+                <span class="text-slate-500">Fonds</span><span class="font-mono font-semibold" id="k_valFonds">—</span>
+              </div>
+              <div class="flex justify-between text-xs mt-1">
+                <span class="text-slate-500">Par clé</span><span class="font-mono" id="k_valTotalPm">—</span>
+              </div>
+            </div>
+
+            <div class="rounded-lg p-3" style="background:#F1F5F9;border:1px solid #94A3B8">
+              <div class="text-xs uppercase tracking-wider font-semibold" style="color:#475569">B · Comparables €/clé</div>
+              <div class="text-2xl font-bold mt-1" style="color:#0F172A" id="k_valComp">—</div>
+              <div class="text-xs text-slate-600 mt-1" id="k_valCompSub">prix de réf × nb clés</div>
+              <div class="flex justify-between mt-2 pt-2 border-t border-slate-300 text-xs">
+                <span class="text-slate-500">Référence /clé</span><span class="font-mono font-semibold" id="k_pxClefRef">—</span>
+              </div>
+              <div class="flex justify-between text-xs">
+                <span class="text-slate-500">Nb clés</span><span class="font-mono font-semibold" id="k_nbClef">—</span>
+              </div>
+              <div class="flex justify-between text-xs mt-1">
+                <span class="text-slate-500">Écart vs revenue</span><span class="font-mono" id="k_ecartComp">—</span>
+              </div>
+            </div>
+
+            <div class="rounded-lg p-3" style="background:#FEF7E6;border:1px solid #F4D488">
+              <div class="text-xs uppercase tracking-wider font-semibold" style="color:var(--gold)">C · Cross-checks marché</div>
+              <div class="flex justify-between mt-2 text-xs">
+                <span class="text-slate-500">Loyer admissible</span><span class="font-mono font-semibold" id="k_loyer">—</span>
+              </div>
+              <div class="flex justify-between text-xs">
+                <span class="text-slate-500">Murs / m²</span><span class="font-mono font-semibold" id="k_valMursPm">—</span>
+              </div>
+              <div class="flex justify-between text-xs">
+                <span class="text-slate-500">Murs+Fonds / clé</span><span class="font-mono font-semibold" id="k_valTotalParClef">—</span>
+              </div>
+              <div class="flex justify-between text-xs">
+                <span class="text-slate-500">Multiple CA</span><span class="font-mono font-semibold" id="k_xCA">—</span>
+              </div>
+              <div class="flex justify-between text-xs">
+                <span class="text-slate-500">Cap rate implicite</span><span class="font-mono font-semibold" id="k_capImplicite">—</span>
+              </div>
+              <div class="text-xs text-slate-500 italic mt-1">Réf. Paris 2025 : 9.5× CA</div>
+            </div>
+          </div>
+
+          <!-- Pondération slider visualisé -->
+          <div class="mt-4 pt-3 border-t border-slate-200 text-xs text-slate-500">
+            <span class="font-semibold">Pondération </span>: <span class="font-mono" id="k_weightShow">—</span> · ajustable dans la section 9.
           </div>
         </div>
       </div>
@@ -479,10 +561,21 @@
 
 <script>
 const fmt = n => isNaN(n) || !isFinite(n) ? '—' : new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);
+const fmtCompact = n => {
+  if(isNaN(n) || !isFinite(n)) return '—';
+  const abs = Math.abs(n);
+  const sign = n < 0 ? '-' : '';
+  if(abs >= 1e6) return sign + (abs/1e6).toFixed(2).replace('.', ',') + ' M€';
+  if(abs >= 1e3) return sign + (abs/1e3).toFixed(0) + ' k€';
+  return sign + Math.round(abs) + ' €';
+};
+const fmtPlus = n => (n>=0?'+':'') + fmt(n);
+const fmtPlusCompact = n => (n>=0?'+':'') + fmtCompact(n);
 const pct = n => isNaN(n) || !isFinite(n) ? '—' : (n*100).toFixed(1)+' %';
+const pctSigned = n => isNaN(n) || !isFinite(n) ? '—' : (n>=0?'+':'') + (n*100).toFixed(1) + ' %';
 const num = n => isNaN(n) || !isFinite(n) ? '—' : n.toFixed(2);
 
-const ids = ['chstd','chsui','pxstd','pxsui','to','jours','surf','tva','prix','fraisM','capex','fb','cd','ms','cf','mgmt','menage','pctOTA','commOTA','effort','caprate','fraisMS','honV','honG','chNR','prov','idxL','idxC','taxAct','caxSort','horDCF','multCA','multEBE','ebePctCA','decote','ltv','taux','duree','balloon','horizon','growth','decoteExit'];
+const ids = ['chstd','chsui','pxstd','pxsui','to','jours','surf','tva','prix','fraisM','capex','fb','cd','ms','cf','mgmt','menage','pctOTA','commOTA','effort','caprate','fraisMS','honV','honG','chNR','prov','idxL','idxC','taxAct','caxSort','horDCF','multCA','multEBE','ebePctCA','decote','ltv','taux','duree','balloon','horizon','growth','decoteExit','pxClefRef','weightRev'];
 const inputs = {};
 ids.forEach(id => inputs[id] = document.getElementById('s_'+id));
 
@@ -497,11 +590,11 @@ function setDebtType(t){
 }
 
 const PRESETS = {
-  paris3: {chstd:14,chsui:2,pxstd:170,pxsui:240,to:0.78,jours:355,surf:400,tva:0.10,prix:5500000,fraisM:0.07,capex:1500000,fb:0.18,cd:0.22,ms:380000,cf:140000,mgmt:0.05,menage:0.08,pctOTA:0.80,commOTA:0.13,effort:0.155,caprate:0.0475,fraisMS:0.08,honV:0.02,honG:0.03,chNR:0.035,prov:0.03,idxL:0.025,idxC:0.020,taxAct:0.0475,caxSort:0.0525,horDCF:9,multCA:3.5,multEBE:12,ebePctCA:0.30,decote:0.15,ltv:0.70,taux:0.045,duree:20,balloon:0.30,horizon:7,growth:0.020,decoteExit:0.05},
-  paris4: {chstd:18,chsui:4,pxstd:280,pxsui:480,to:0.80,jours:355,surf:600,tva:0.10,prix:9000000,fraisM:0.07,capex:2500000,fb:0.25,cd:0.24,ms:600000,cf:200000,mgmt:0.05,menage:0.08,pctOTA:0.65,commOTA:0.13,effort:0.145,caprate:0.0425,fraisMS:0.08,honV:0.02,honG:0.03,chNR:0.035,prov:0.03,idxL:0.025,idxC:0.020,taxAct:0.0425,caxSort:0.0475,horDCF:9,multCA:3.8,multEBE:13,ebePctCA:0.32,decote:0.15,ltv:0.65,taux:0.045,duree:20,balloon:0.30,horizon:7,growth:0.025,decoteExit:0.05},
-  paris_eco: {chstd:25,chsui:0,pxstd:120,pxsui:160,to:0.75,jours:340,surf:500,tva:0.10,prix:3500000,fraisM:0.07,capex:600000,fb:0.10,cd:0.20,ms:280000,cf:100000,mgmt:0.04,menage:0.08,pctOTA:0.85,commOTA:0.15,effort:0.180,caprate:0.0500,fraisMS:0.08,honV:0.02,honG:0.03,chNR:0.035,prov:0.03,idxL:0.025,idxC:0.020,taxAct:0.0500,caxSort:0.0550,horDCF:9,multCA:3.2,multEBE:11,ebePctCA:0.28,decote:0.15,ltv:0.70,taux:0.045,duree:20,balloon:0.30,horizon:7,growth:0.015,decoteExit:0.05},
-  cannes4: {chstd:14,chsui:2,pxstd:280,pxsui:480,to:0.72,jours:300,surf:450,tva:0.10,prix:4500000,fraisM:0.07,capex:1800000,fb:0.20,cd:0.23,ms:380000,cf:130000,mgmt:0.05,menage:0.10,pctOTA:0.75,commOTA:0.13,effort:0.130,caprate:0.0500,fraisMS:0.08,honV:0.02,honG:0.03,chNR:0.035,prov:0.03,idxL:0.025,idxC:0.020,taxAct:0.0500,caxSort:0.0550,horDCF:9,multCA:3.5,multEBE:11,ebePctCA:0.30,decote:0.15,ltv:0.70,taux:0.045,duree:20,balloon:0.30,horizon:7,growth:0.020,decoteExit:0.05},
-  region: {chstd:35,chsui:5,pxstd:130,pxsui:180,to:0.65,jours:340,surf:1200,tva:0.10,prix:4000000,fraisM:0.07,capex:1200000,fb:0.30,cd:0.25,ms:500000,cf:180000,mgmt:0.04,menage:0.07,pctOTA:0.70,commOTA:0.13,effort:0.130,caprate:0.0625,fraisMS:0.08,honV:0.02,honG:0.03,chNR:0.035,prov:0.03,idxL:0.025,idxC:0.020,taxAct:0.0625,caxSort:0.0675,horDCF:9,multCA:2.8,multEBE:9,ebePctCA:0.28,decote:0.15,ltv:0.70,taux:0.045,duree:20,balloon:0.30,horizon:7,growth:0.015,decoteExit:0.05}
+  paris3: {chstd:14,chsui:2,pxstd:170,pxsui:240,to:0.78,jours:355,surf:400,tva:0.10,prix:5500000,fraisM:0.07,capex:1500000,fb:0.18,cd:0.22,ms:380000,cf:140000,mgmt:0.05,menage:0.08,pctOTA:0.80,commOTA:0.13,effort:0.155,caprate:0.0475,fraisMS:0.08,honV:0.02,honG:0.03,chNR:0.035,prov:0.03,idxL:0.025,idxC:0.020,taxAct:0.0475,caxSort:0.0525,horDCF:9,multCA:3.5,multEBE:12,ebePctCA:0.30,decote:0.15,ltv:0.70,taux:0.045,duree:20,balloon:0.30,horizon:7,growth:0.020,decoteExit:0.05,pxClefRef:320000,weightRev:0.7},
+  paris4: {chstd:18,chsui:4,pxstd:280,pxsui:480,to:0.80,jours:355,surf:600,tva:0.10,prix:9000000,fraisM:0.07,capex:2500000,fb:0.25,cd:0.24,ms:600000,cf:200000,mgmt:0.05,menage:0.08,pctOTA:0.65,commOTA:0.13,effort:0.145,caprate:0.0425,fraisMS:0.08,honV:0.02,honG:0.03,chNR:0.035,prov:0.03,idxL:0.025,idxC:0.020,taxAct:0.0425,caxSort:0.0475,horDCF:9,multCA:3.8,multEBE:13,ebePctCA:0.32,decote:0.15,ltv:0.65,taux:0.045,duree:20,balloon:0.30,horizon:7,growth:0.025,decoteExit:0.05,pxClefRef:500000,weightRev:0.7},
+  paris_eco: {chstd:25,chsui:0,pxstd:120,pxsui:160,to:0.75,jours:340,surf:500,tva:0.10,prix:3500000,fraisM:0.07,capex:600000,fb:0.10,cd:0.20,ms:280000,cf:100000,mgmt:0.04,menage:0.08,pctOTA:0.85,commOTA:0.15,effort:0.180,caprate:0.0500,fraisMS:0.08,honV:0.02,honG:0.03,chNR:0.035,prov:0.03,idxL:0.025,idxC:0.020,taxAct:0.0500,caxSort:0.0550,horDCF:9,multCA:3.2,multEBE:11,ebePctCA:0.28,decote:0.15,ltv:0.70,taux:0.045,duree:20,balloon:0.30,horizon:7,growth:0.015,decoteExit:0.05,pxClefRef:200000,weightRev:0.7},
+  cannes4: {chstd:14,chsui:2,pxstd:280,pxsui:480,to:0.72,jours:300,surf:450,tva:0.10,prix:4500000,fraisM:0.07,capex:1800000,fb:0.20,cd:0.23,ms:380000,cf:130000,mgmt:0.05,menage:0.10,pctOTA:0.75,commOTA:0.13,effort:0.130,caprate:0.0500,fraisMS:0.08,honV:0.02,honG:0.03,chNR:0.035,prov:0.03,idxL:0.025,idxC:0.020,taxAct:0.0500,caxSort:0.0550,horDCF:9,multCA:3.5,multEBE:11,ebePctCA:0.30,decote:0.15,ltv:0.70,taux:0.045,duree:20,balloon:0.30,horizon:7,growth:0.020,decoteExit:0.05,pxClefRef:450000,weightRev:0.7},
+  region: {chstd:35,chsui:5,pxstd:130,pxsui:180,to:0.65,jours:340,surf:1200,tva:0.10,prix:4000000,fraisM:0.07,capex:1200000,fb:0.30,cd:0.25,ms:500000,cf:180000,mgmt:0.04,menage:0.07,pctOTA:0.70,commOTA:0.13,effort:0.130,caprate:0.0625,fraisMS:0.08,honV:0.02,honG:0.03,chNR:0.035,prov:0.03,idxL:0.025,idxC:0.020,taxAct:0.0625,caxSort:0.0675,horDCF:9,multCA:2.8,multEBE:9,ebePctCA:0.28,decote:0.15,ltv:0.70,taux:0.045,duree:20,balloon:0.30,horizon:7,growth:0.015,decoteExit:0.05,pxClefRef:130000,weightRev:0.7}
 };
 
 function applyPreset(name){
@@ -636,10 +729,20 @@ function calc(p){
   const valFonds = valFondsCroisiere * (1 - p.decote);
   const valFondsPm = totalChbres>0 ? valFonds / totalChbres : 0;
 
-  // === TOTAL ===
+  // === TOTAL méthode revenue ===
   const valTotal = valMurs + valFonds;
   const valTotalPm = totalChbres>0 ? valTotal / totalChbres : 0;
   const xCA = ca>0 ? valTotal / ca : 0;
+  const capImplicite = valMurs>0 ? loyer / valMurs : 0;
+
+  // === Méthode comparables (prix/clé) ===
+  const valComp = totalChbres * p.pxClefRef;
+  const ecartCompPct = valTotal>0 ? (valComp - valTotal) / valTotal : 0;
+
+  // === Moyenne pondérée ===
+  const wRev = Math.max(0, Math.min(1, p.weightRev));
+  const valFinal = wRev * valTotal + (1-wRev) * valComp;
+  const valFinalPm = totalChbres>0 ? valFinal / totalChbres : 0;
 
   // === SORTIE ===
   const horizon = Math.round(p.horizon);
@@ -688,7 +791,8 @@ function calc(p){
     valMursAcq_dcf, valMursVendeur_dcf, cumDCFActu, valMursExitActu,
     valMurs, valMursPm,
     ebePotentiel, valFonds_baremes, valFonds_ebe, valFondsCroisiere, valFonds, valFondsPm,
-    valTotal, valTotalPm, xCA,
+    valTotal, valTotalPm, xCA, capImplicite,
+    valComp, ecartCompPct, valFinal, valFinalPm,
     horizon, ebitdaExit, exitValueGross, detteResiduelle, netEquityExit,
     yearlyCFFDL, cumCFFDL, irr: irrVal, moic, plusValue, factors
   };
@@ -739,21 +843,40 @@ function render(p, r){
   document.getElementById('v_horizon').textContent = Math.round(p.horizon) + ' ans';
   document.getElementById('v_growth').textContent = pct(p.growth);
   document.getElementById('v_decoteExit').textContent = pct(p.decoteExit);
+  document.getElementById('v_pxClefRef').textContent = fmtCompact(p.pxClefRef) + ' / clé';
+  document.getElementById('v_weightRev').textContent = pct(p.weightRev) + ' rev / ' + pct(1-p.weightRev) + ' comp';
 
-  // Top valuation panel
-  document.getElementById('k_valMurs').textContent = fmt(r.valMurs);
-  document.getElementById('k_valMursPm').textContent = fmt(r.valMursPm) + ' / m² · ' + fmt(r.valMurs/Math.max(1,r.totalChbres)) + ' / clé';
-  document.getElementById('k_valFonds').textContent = fmt(r.valFonds);
-  document.getElementById('k_valFondsPm').textContent = fmt(r.valFondsPm) + ' / clé';
-  document.getElementById('k_valTotal').textContent = fmt(r.valTotal);
-  document.getElementById('k_valTotalPm').textContent = fmt(r.valTotalPm) + ' / clé';
-
-  const ecart = r.valTotal - p.prix;
+  // === SYNTHÈSE — Headline ===
+  document.getElementById('k_valFinal').textContent = fmtCompact(r.valFinal);
+  document.getElementById('k_valFinalSub').textContent = fmtCompact(r.valFinalPm) + ' / clé · ' + fmt(r.valFinal);
+  const ecart = r.valFinal - p.prix;
   const ecartPct = p.prix>0 ? ecart/p.prix : 0;
-  document.getElementById('k_vsPrix').textContent = (ecart>=0?'+':'') + fmt(ecart) + ' (' + (ecartPct>=0?'+':'') + pct(ecartPct) + ')';
-  document.getElementById('k_loyer').textContent = fmt(r.loyer);
-  document.getElementById('k_loyerSub').textContent = pct(p.effort) + ' du CA réalisable net OTA';
-  document.getElementById('k_xCA').textContent = num(r.xCA) + 'x CA';
+  const vsP = document.getElementById('k_vsPrix');
+  vsP.textContent = pctSigned(ecartPct);
+  vsP.style.color = ecart>=0 ? 'var(--green)' : '#B91C1C';
+  document.getElementById('k_prixRef').textContent = fmtCompact(p.prix);
+  document.getElementById('k_vsPrixSub').innerHTML = 'écart : <b>' + fmtPlusCompact(ecart) + '</b> · prix proposé : ' + fmtCompact(p.prix);
+
+  // === Méthode A : revenue ===
+  document.getElementById('k_valTotal').textContent = fmtCompact(r.valTotal);
+  document.getElementById('k_valMurs').textContent = fmtCompact(r.valMurs);
+  document.getElementById('k_valFonds').textContent = fmtCompact(r.valFonds);
+  document.getElementById('k_valTotalPm').textContent = fmtCompact(r.valTotalPm);
+
+  // === Méthode B : comparables ===
+  document.getElementById('k_valComp').textContent = fmtCompact(r.valComp);
+  document.getElementById('k_pxClefRef').textContent = fmtCompact(p.pxClefRef);
+  document.getElementById('k_nbClef').textContent = r.totalChbres + ' clés';
+  document.getElementById('k_ecartComp').textContent = pctSigned(r.ecartCompPct);
+
+  // === Méthode C : cross-checks ===
+  document.getElementById('k_loyer').textContent = fmtCompact(r.loyer);
+  document.getElementById('k_valMursPm').textContent = fmtCompact(r.valMursPm) + ' / m²';
+  document.getElementById('k_valTotalParClef').textContent = fmtCompact(r.valTotalPm);
+  document.getElementById('k_xCA').textContent = num(r.xCA) + '×';
+  document.getElementById('k_capImplicite').textContent = pct(r.capImplicite);
+
+  document.getElementById('k_weightShow').textContent = pct(p.weightRev) + ' revenue + ' + pct(1-p.weightRev) + ' comparables';
 
   // Verdict valorisation
   const vBadge = document.getElementById('valVerdict');
